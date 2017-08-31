@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 用户下载固件记录信息mapper -->
+<mapper namespace="com.yf.pet.dao.adminuser.AdminUserDao">
+    <!-- 用户下载固件记录信息map对象 -->
+    <resultMap id="AdminUserMap" type="com.yf.pet.entity.adminuser.AdminUser">
+        <result column="id" property="id"/>
+        <result column="account" property="account"/>
+        <result column="pwd" property="pwd"/>
+        <result column="name" property="name"/>
+        <result column="role" property="role"/>
+        <result column="notes" property="notes"/>
+        <result column="create_date" property="createDate"/>
+        <result column="access_token" property="accessToken"/>
+        <result column="validity_date" property="validityDate"/>
+    </resultMap>
+
+    <select id="findAdminUser" resultMap="AdminUserMap">
+        SELECT id,account,name,role,notes,create_date,access_token,validity_date
+        FROM t_admin_user
+        WHERE  account = #{account}
+        and pwd = #{pwd}
+    </select>
+    <select id="findAdminUserByToken" resultMap="AdminUserMap">
+        SELECT id,account,name,role,notes,create_date,access_token,validity_date
+        FROM t_admin_user
+        WHERE  access_token = #{accessToken}
+    </select>
+
+    <update id="updateAdminUser">
+        UPDATE t_admin_user
+        set access_token = #{accessToken},
+            validity_date = #{validityDate}
+        where id=#{id}
+    </update>
+</mapper>

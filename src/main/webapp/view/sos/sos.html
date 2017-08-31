@@ -1,0 +1,199 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1">
+    <title>SOS</title>
+    <!--<link href="../../accset/common/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet"/>-->
+
+    <style>
+        html, body, .wrap, .map {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font: 14px/1.6em "HelveticaNeue-Light", "Helvetica Neue", Helvetica, "Microsoft YaHei", Arial, sans-serif;
+        }
+
+        body, div {
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        .info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 99;
+            max-width: 60%;
+            margin: 9px;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, .8);
+            box-shadow: 2px 2px 5px #999;
+            border-radius: 2px;
+        }
+
+        .info em {
+            font-style: normal;
+            color: #c00;
+        }
+
+        .info p {
+            margin: .5em 0;
+        }
+
+        @media (max-width: 768px) {
+            .info {
+                max-width: 100%;
+                top: 0;
+                left: 0;
+                margin: 0;
+                border-radius: 0;
+            }
+        }
+    </style>
+
+
+</head>
+
+<body>
+<div class="wrap">
+    <div class="map" id="map">
+    </div>
+    <div class="info" id="title">
+    </div>
+</div>
+    <script src="../../accset/common/jquery-2.1.4.js"></script>
+
+    <script type="text/javascript">
+        //get url parameter for: cc.html？a=1&b=2   request("a") //return 1
+		function request(strName){
+			var strHref = window.document.location.href;
+			var intPos = strHref.indexOf("?");
+			var strRight = strHref.substr(intPos + 1);
+			var arrTmp = strRight.split("&");
+			for(var i = 0; i < arrTmp.length; i++){
+				var arrTemp = arrTmp[i].split("=");
+				if(arrTemp[0].toUpperCase() == strName.toUpperCase()) 
+					return arrTemp[1];
+				}
+			return ""; 
+		};
+		
+		$(function(){
+            var sosId = request('sosid');
+			if(sosId == undefined || sosId === ''){
+				location.href ="soserr.html";
+//                console.log("error");
+			}
+		})
+	</script>
+   	<!-- 加载地图 -->
+   	<script>
+        // get sosid
+        var sosId = request('sosid');
+
+	   	$(function(){
+            // 1. find tumble info
+	         $.ajax({
+	             type: "POST",
+                 url: "/coros/sos/find.do",
+                 contentType: 'application/json',
+	             data: JSON.stringify({sosId: sosId}),
+                 dataType: "json",
+	             success: function(data){
+                     if (data && data.result === "0000") {
+                         var nickname = data.data.nickname;
+                         var sosLogLat = data.data.sosLogLat;
+	            		 var logLatArr = sosLogLat.split(',');
+	            		 sosLogLat = logLatArr[1] + ',' + logLatArr[0];
+//                         var tumbleTime = data.data.tumbleTime;
+//                         var tumbleDate = data.data.tumbleDate;
+                         var tumbleDate = data.data.sosShowTime;
+                         tagTumble(nickname, sosLogLat, tumbleDate);
+	            	 }else if(data){
+                         location.href = "soserr.html";
+	            		 console.log("error");
+	            	 }
+	            },
+                 error: function (xhr, errorInfo, ex) {
+	      　			location.href ="soserr.html";
+	      　		},
+	         }); 
+	   		
+	         
+	   		
+		});
+
+        /**
+         *On the map to mark friends fall geographic location
+         *@param nickname
+         *@param sosLogLat
+         *@param tumbleDate
+         */
+        function tagTumble(nickname, sosLogLat, tumbleDate) {
+	   		$.ajax({
+	            type: "POST",
+	            url: 'https://maps.googleapis.com/maps/api/geocode/json?latlng='+sosLogLat+'&key=AIzaSyBOdiTnsZD1uC1pP5gpj_tzV4HrATVCRLQ&language=en',
+                dataType: "json",
+	            success: function(data){
+                    // error  not log lat
+                    if (data.results[0] && data.results[0] != undefined) {
+                        var formatted_address = data.results[0].formatted_address;
+                        var htmlText = '<b>' + nickname + '</b> fell down at <b>' + formatted_address + '</b>， please go to help him/her ASAP, ' + tumbleDate;
+		            	$('#title').html(htmlText);
+	            	}else{
+	            		location.href ="soserr.html";
+	            	}
+	            	var logLatArr = sosLogLat.split(',');
+	            	initMap(logLatArr[0],logLatArr[1]);
+	           },
+                error: function (xhr, errorInfo, ex) {
+	     　			location.href ="soserr.html";
+	     　		},
+	        });
+	   	}
+   
+		/* 
+         * init googleMap
+         * lat
+         * lng
+	   	*
+	   	*/
+		function initMap(lat, lng) {
+			  var myLatLng = {lat: Number(lat), lng: Number(lng)};
+			  // Create a map object and specify the DOM element for display.
+			  var map = new google.maps.Map(document.getElementById('map'), {
+			    center: myLatLng,
+			    scrollwheel: false,
+			    zoom: 12
+			  });
+
+			  var marker = new google.maps.Marker({
+			    map: map,
+			    position: myLatLng,
+			    title: 'Tumble'
+			  });
+
+            /* img
+			 	var image = 'images/main/location.png';
+		        var myLatLng = new google.maps.LatLng(-34.94533,138.58934);
+		        var beachMarker = new google.maps.Marker({
+		            position: myLatLng,
+		            map: map,
+		            icon: image
+		        }); */
+		}
+    </script>
+
+
+<!-- signed_in=true Enable the login, the map will show the avatars，callback=initMap Call the loading map method -->
+    <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCbYdIhzadR12ydBQbP6LlCOTC5EQnsoYw&signed_in=false&callback=initMap&language=cn"
+        async defer></script> -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBOdiTnsZD1uC1pP5gpj_tzV4HrATVCRLQ&signed_in=false&language=en" async defer></script>
+</body>
+</html>

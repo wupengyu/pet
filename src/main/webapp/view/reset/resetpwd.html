@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="renderer" content="webkit">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1">
+<meta name="format-detection" content="telephone=no">
+<link rel="stylesheet" href="../../accset/biz/style.css">
+<head>
+    <meta charset="UTF-8">
+    <title>Verify Email</title>
+</head>
+<body>
+<div class="wrap">
+    <div class="main">
+
+        <div class="logo"><img src="../../accset/image/logo.png"></div>
+        <div class="bar"><img src="../../accset/image/bar.png"></div>
+        <h1 class="change">Change Password</h1>
+
+        <div class="fm">
+            <input class="inp" id="psw" type="password" placeholder="New Password" minlength="6" maxlength="22"
+                   required>
+            <p class="fm-tips" id="fmTips"></p>
+            <button id="btnResetPWD" class="btn">Change password</button>
+            <div class="inp-exp" id="show">
+                <input id="showpsw" type="checkbox">
+                <label for="showpsw" class="inp-exp">show</label>
+            </div>
+        </div>
+    </div>
+</div>
+<!--<script src="../../accset/biz/zepto/zepto.js"></script>-->
+<script src="../../accset/common/jquery-2.1.4.js"></script>
+<script type="text/javascript" src="../../accset/common/jquery-tools/jquery.md5.js"></script>
+
+<script>
+    //query parameter
+    function request(strName) {
+        var strHref = window.document.location.href;
+        var intPos = strHref.indexOf("?");
+        var strRight = strHref.substr(intPos + 1);
+        var arrTmp = strRight.split("&");
+        for (var i = 0; i < arrTmp.length; i++) {
+            var arrTemp = arrTmp[i].split("=");
+            if (arrTemp[0].toUpperCase() == strName.toUpperCase())
+                return arrTemp[1];
+        }
+        return "";
+    }
+
+    // account and result
+    var email = request('email')
+    var checkCode = request('checkCode');
+
+    $(function () {
+        // reset
+        $('#btnResetPWD').click(function () {
+            // 1. check password
+            var pwd = $('#psw').val();
+            // 2. password is not null
+            if (!pwd) {
+                $("#fmTips").text("Password cannot be empty.");
+                return false;
+            }
+            // 3. password length between 6 and 20
+            if (pwd.length < 6 || pwd.length > 20) {
+                $("#fmTips").text("The password should be between 6 figures to 20 digits.");
+                return false;
+            }
+            // 4. password not space
+            if (pwd.match('\\s+')) {
+                $("#fmTips").text("The password can\'t contain Spaces.");
+                return false;
+            }
+            // md5
+            pwd = $.md5(pwd);
+            // 4. submit
+            $.ajax({
+                type: "POST",
+                url: "/coros/account/password/reset.do",
+                contentType: 'application/json',//传递参数类型
+                data: JSON.stringify({account: email, pwd: pwd, checkCode: checkCode, accountType: 2}),
+                dataType: "json",// parameter
+                success: function (data) {
+                    if (data && data.result === "0000") {
+                        $("#fmTips").text("Password reset successfully");
+                        location.href = "resetpwdsuccess.html?message=Password reset successfully";
+                    } else if (data && data.result === '2009') {
+                        location.href = "resetpwdsuccess.html?message=Link invalid";
+                    } else if (data && data.result === '1015') {
+                        location.href = "resetpwdsuccess.html?message=Link invalid";
+                    } else if (data) {
+                        $("#fmTips").text(data.message);
+                        return false;
+                    }
+                },
+                error: function (xhr, errorInfo, ex) {
+                    show.append('error invoke!errorInfo:' + errorInfo + '<br/>');
+                }
+            });
+        });
+    });
+
+
+    $("#showpsw").change(function () {
+        if ($("#showpsw").is(":checked")) {
+            $("#psw").attr("type", "text")
+        } else {
+            $("#psw").attr("type", "password")
+        }
+    });
+    //    $("#fm").submit(function () {
+    //        $("#fmTips").text("Error message.");
+    //        return false;
+    //    });
+</script>
+</body>
+</html>

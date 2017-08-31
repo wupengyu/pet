@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--验证码Mapper-->
+<mapper namespace="com.yf.pet.dao.checkcode.CheckCodeDao">
+    <!--验证码查询返回结果-->
+    <resultMap id="checkCodeResultMap" type="com.yf.pet.entity.checkcode.CheckCode">
+        <result column="id" property="id"/>
+        <result column="account" property="account"/>
+        <result column="check_code" property="checkCode"/>
+        <result column="create_date" property="createDate"/>
+        <result column="type" property="type"/>
+        <result column="valid" property="valid"/>
+        <result column="user_id" property="userId"/>
+    </resultMap>
+
+    <!-- 新增判断验证码信息 -->
+    <insert id="addCheckCode">
+        INSERT INTO t_check_code(account,check_code,create_date,type,user_id)
+        VALUES(#{account},#{checkCode},#{createDate},#{type},#{userId})
+    </insert>
+
+    <!--查询用户最后一次获取验证码的信息-->
+    <select id="findLastCheckCodeByAccount" resultMap="checkCodeResultMap">
+        SELECT
+        id,account,check_code,create_date,type,valid,user_id
+        FROM t_check_code
+        <where>
+            account = #{account}
+            AND type = #{type}
+            <if test="userId != null and userId != 0">
+                AND user_id = #{userId}
+            </if>
+        </where>
+        ORDER BY create_date DESC
+        LIMIT 1
+    </select>
+
+    <!--用户当天获取验证码的次数-->
+    <select id="findCheckCodeCountToday" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM t_check_code model
+        WHERE account = #{account}
+        AND type = #{type}
+        AND DATE(create_date) = CURDATE()
+    </select>
+
+    <!--修改验证码状态,valid:1:表示有效,0:表示无效-->
+    <update id="updateCheckCodeValid">
+        UPDATE t_check_code
+        SET valid = #{valid}
+        WHERE id=#{id}
+    </update>
+
+    <!--修改验证码状态,valid:1:表示有效,0:表示无效-->
+    <update id="updateCheckCodeValidByAccount">
+        UPDATE t_check_code
+        SET valid = #{valid}
+        <where>
+            account = #{account}
+            AND type = #{type}
+            <if test="userId != null and userId != 0">
+                AND user_id = #{userId}
+            </if>
+        </where>
+    </update>
+
+    <!--修改验证码状态,激活邮件,修改密码邮件,发送邮件以后会把之前的邮件设置为无效-->
+    <update id="updateCheckCodeInValidBeforeSendMail">
+        UPDATE t_check_code
+        SET valid = 0
+        <where>
+            account = #{account}
+            AND type = #{type}
+            AND id != #{id}
+            AND valid = 1
+        </where>
+    </update>
+
+</mapper>

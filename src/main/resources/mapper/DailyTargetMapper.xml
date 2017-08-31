@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 用户目标值保存mapper -->
+<mapper namespace="com.yf.pet.dao.dailytarget.DailyTargetDao">
+    <!-- 用户目标值map对象 -->
+    <resultMap id="DailyTargetMap" type="com.yf.pet.entity.dailytarget.DailyTarget">
+        <result column="user_id" property="userId"/>
+        <result column="target_type" property="targetType"/>
+        <result column="target_value" property="targetValue"/>
+        <result column="happen_date" property="happenDate"/>
+        <result column="create_date" property="createDate"/>
+        <result column="status" property="status"/>
+    </resultMap>
+
+    <!-- 新增用户目标值信息 -->
+    <insert id="addDailyTarget" useGeneratedKeys="true" keyProperty="userId">
+        INSERT INTO t_daily_target(user_id,target_type,target_value,happen_date,create_date)
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.userId},#{item.targetType},#{item.targetValue},#{item.happenDate},#{item.createDate})
+        </foreach>
+    </insert>
+
+    <!--修改用户当天的目标值-->
+    <update id="updateDailyTargets">
+        <foreach collection="list" item="item" index="index" separator=";">
+            UPDATE t_daily_target
+            <set>
+                target_value = #{item.targetValue}
+            </set>
+            WHERE user_id =#{item.userId}
+            AND target_type = #{item.targetType}
+            AND happen_date = #{item.happenDate}
+        </foreach>
+    </update>
+
+    <!--查询用户某天的目标信息-->
+    <select id="findDailyTargetsByHappenDate" resultMap="DailyTargetMap">
+        SELECT user_id,target_type,target_value,happen_date
+        FROM t_daily_target
+        WHERE user_id = #{userId}
+        AND happen_date = #{happenDate}
+    </select>
+
+    <!--查询用户最近的目标值变更记录-->
+    <select id="findLastDailyTargetByUserId" resultMap="DailyTargetMap">
+        SELECT
+            t.user_id, t.target_type, t.target_value, t.happen_date
+        FROM
+            (SELECT
+                user_id, target_type, target_value, happen_date
+            FROM
+                t_daily_target
+                WHERE user_id = #{userId}
+            ORDER BY create_date DESC) t
+        GROUP BY t.target_type
+    </select>
+
+    <!--查询指定天以后所有的用户目标值信息-->
+    <select id="findDailyTargetsByDayLastData" resultMap="DailyTargetMap">
+        SELECT
+        t.user_id,
+        t.target_type,
+        t.target_value,
+        t.happen_date,
+        t.create_date
+        FROM
+        (SELECT
+        user_id, target_type, target_value, happen_date, create_date
+        FROM
+        t_daily_target
+        WHERE user_id = #{userId}
+        <if test="happenDate != null">
+            <![CDATA[
+        AND  happen_date >= #{happenDate}
+        ]]>
+        </if>
+        ORDER BY create_date DESC) t
+        GROUP BY t.happen_date , t.target_type
+        ORDER BY happen_date DESC
+    </select>
+
+    <!--查询指定天的最近一次目标值变化记录的日期-->
+    <select id="findRecentHappenDate" resultType="java.lang.Integer">
+        select happen_date from t_daily_target
+        where user_id = #{userId}
+        <![CDATA[
+        and happen_date <= #{happenDate}
+        ]]>
+        AND target_type = #{targetType}
+        order by happen_date desc limit 1
+    </select>
+
+    <!--查询用户最近一次的目标值信息,目标运动时间、目标运动卡路里-->
+    <select id="findDailyTargetsLast" resultMap="DailyTargetMap">
+        SELECT
+          target_type, target_value, create_date
+        FROM
+        (
+          SELECT
+            target_type, target_value, create_date
+          FROM
+        t_daily_target
+          WHERE
+            user_id = #{userId}
+          ORDER BY create_date DESC
+        ) target
+        GROUP BY target_type
+    </select>
+</mapper>

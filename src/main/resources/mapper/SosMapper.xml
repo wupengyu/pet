@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- sos短信管理mapper -->
+<mapper namespace="com.yf.pet.dao.sossms.SosDao">
+    <!-- sos短信发送限制map对象 -->
+    <resultMap id="sosLimitMap" type="com.yf.pet.entity.sossms.SmsLimit">
+        <result column="userid" property="userId"/>
+        <result column="lasttime" property="lastTime"/>
+        <result column="times" property="times"/>
+        <result column="sumtimes" property="sumTimes"/>
+        <result column="smstype" property="smsType"/>
+    </resultMap>
+
+    <!-- sos短信发送记录map对象 -->
+    <resultMap id="sosRecordMap" type="com.yf.pet.entity.sossms.SmsRecord">
+        <result column="sosid" property="sosId"/>
+        <result column="userid" property="userId"/>
+        <result column="sosloglat" property="sosLogLat"/>
+        <result column="sosaddress" property="sosAddress"/>
+        <result column="msgcontent" property="msgContent"/>
+        <result column="createtime" property="createTime"/>
+        <result column="nickname" property="nickname"/>
+        <result column="tumbletime" property="tumbleTime"/>
+        <result column="contactsmobile" property="contactsMobile"/>
+        <result column="smstype" property="smsType"/>
+        <result column="tumbletimezone" property="tumbleTimezone"/>
+		<result column="timezonename" property="timezoneName"/>
+    </resultMap>
+
+    <!-- 新增sos短信发送记录 -->
+    <insert id="addSosRecord" useGeneratedKeys="true" keyProperty="sosId">
+		INSERT INTO
+		t_sos_record(sosid,userid,sosloglat,sosaddress,msgcontent,createtime,nickname,tumbletime,tumbletimezone,
+		contactsmobile,smstype,timezonename)
+		VALUES(#{sosId},#{userId},#{sosLogLat},#{sosAddress},#{msgContent},#{createTime},#{nickname},#{tumbleTime},#{tumbleTimezone},
+		#{contactsMobile},#{smsType},#{timezoneName})
+	</insert>
+
+    <!-- 修改用户跌倒地点信息 -->
+    <update id="updateSosRecordAddress">
+		UPDATE t_sos_record
+			SET sosaddress = #{sosAddress}
+		WHERE sosid = #{sosId}
+	</update>
+
+    <!-- 查询用户跌倒后发送的sos信息 -->
+    <select id="findSosRecordById" resultMap="sosRecordMap">
+		SELECT
+		sosid,userid,sosloglat,sosaddress,msgcontent,createtime,nickname,tumbletime,tumbletimezone,contactsmobile,timezonename
+		FROM
+		    t_sos_record
+		WHERE sosid = #{sosId}
+	</select>
+
+    <!-- 添加短信发送统计信息 -->
+    <insert id="addSosLimit">
+		INSERT INTO t_sos_limit(userid,lasttime,times,sumtimes,smstype)
+		VALUES(#{userId},#{lastTime},#{times},#{sumTimes},#{smsType})
+	</insert>
+
+    <!-- 当天内短信发送次数累加 -->
+    <update id="updateSosTimesAddUp">
+		UPDATE t_sos_limit
+		SET lasttime = #{lastTime},
+			times = times + 1,
+			sumtimes = sumtimes + 1
+		WHERE userid = #{userId}
+			AND smstype = #{smsType}
+	</update>
+
+    <!-- 初始化短信发送次数，因为第一天的发送次数，到了第二天用户发送sos短信的时候次数要初始化 -->
+    <update id="updateSosInit">
+		UPDATE t_sos_limit
+		SET lasttime = #{lastTime},
+			times =  1,
+			sumtimes = sumtimes + 1
+		WHERE userid = #{userId}
+			AND smstype = #{smsType}
+	</update>
+
+    <!-- 根据用户id查询用户发送sos短信的统计数据 -->
+    <select id="findSosTimsByUserId" resultMap="sosLimitMap">
+		SELECT userid,lasttime,times,sumtimes
+		FROM t_sos_limit
+		WHERE userid = #{userId}
+			AND smstype = #{smsType}
+	</select>
+
+
+</mapper>

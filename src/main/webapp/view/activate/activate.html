@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="renderer" content="webkit">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1">
+<meta name="format-detection" content="telephone=no">
+<style>
+    div {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        background: #111f26;
+        color: #394c57;
+        font-family: "Helvetica Neue", Helvetica, "Microsoft YaHei", Arial, Verdana, sans-serif;
+        text-align: center;
+        font-size: 16px;
+    }
+
+    .wrap {
+        padding: 5%;
+    }
+
+    h1 {
+        margin: 1.2em 0;
+        color: #fff;
+        font-size: 30px;
+        font-weight: normal;
+    }
+
+    .mail {
+        padding: 5px 8px;
+        text-align: center;
+        border: 1px solid #3e515b;
+        background: #111f26;
+    }
+
+    .mail:focus {
+        border-color: #ddd;
+        outline: none;
+    }
+
+    .mail,
+    .tips {
+        color: #ff3749;
+    }
+
+    p {
+        margin: 2em 0;
+    }
+
+    .pft {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+    }
+
+    .pft p {
+        margin-bottom: 18px;
+    }
+
+    .btn {
+        height: 38px;
+        width: 100%;
+        border: none;
+        background: #3e515b;
+        color: #fff;
+        font-size: 17px;
+    }
+</style>
+<head>
+    <meta charset="UTF-8">
+    <title>Verify Email</title>
+</head>
+<body>
+<div class="wrap">
+    <h1>Need to verify email</h1>
+    <p class="txt">Email has been sent to</p>
+    <input id="email" class="mail" value="lakdfjlakjdf@gmail.com">
+    <p class="txt">Please follow the instructions in the E-mail to finish creating your COROS account.</p>
+    <p class="tips" id="tips"></p>
+    <div class="pft">
+        <p class="txt">Did't receive an email?</p>
+        <button class="btn" id="sentBtn">Email Sent</button>
+    </div>
+</div>
+<script src="../../accset/biz/zepto/zepto.js"></script>
+<script>
+    // 1. 获得APP传过来的值
+    //query parameter
+    function request(strName) {
+        var strHref = window.document.location.href;
+        var intPos = strHref.indexOf("?");
+        var strRight = strHref.substr(intPos + 1);
+        var arrTmp = strRight.split("&");
+        for (var i = 0; i < arrTmp.length; i++) {
+            var arrTemp = arrTmp[i].split("=");
+            if (arrTemp[0].toUpperCase() == strName.toUpperCase())
+                return arrTemp[1];
+        }
+        return "";
+    }
+    var accessToken = request('accessToken')// 获得token
+    var oldEmail = request('email');//用户原来的邮箱地址
+    var email = request('email')//获得用户的邮箱地址
+    $('#email').val(email);
+    /**
+     * 2. 输入邮箱地址的时候检查邮箱地址格式是否正确
+     */
+    $("#email").blur(function () {
+        // 1. 页面启动就检查邮箱地址格式
+        checkEmail();
+    });
+
+    /**
+     * 3. 邮箱地址正确性校验
+     * @returns {boolean}
+     */
+    var emailIsTrue = false;//邮箱地址是否正确
+    function checkEmail() {
+//        var email = $('#email').val();
+        if (email == 'Email address') {
+            email = '';
+        }
+        if (email == '') {
+            $("#tips").text('Email address is null');
+            emailIsTrue = false;
+            $('#sentBtn').attr('disabled', 'true');
+            return false
+        }
+        // 两种邮箱地址校验的正则表达式
+        var reg = new RegExp('^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$', 'i');
+        //var reg = new RegExp('\\w[-\\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\\.)+[A-Za-z]{2,14};', 'i');
+        if (!reg.test(email)) {
+            $("#tips").html('Email address wrong');
+            emailIsTrue = false;
+            $('#sentBtn').attr('disabled', "true");
+            return false;
+        }
+        $("#tips").html('');
+        $('#sentBtn').attr("disabled", null);
+        emailIsTrue = true;
+        return true;
+    }
+
+    // 3. 页面启动后执行
+    $(function () {
+        // 检查邮箱是否已经激活
+        checkEamilIsActivated();
+
+        // 事件绑定
+        $('#sentBtn').click(function () {
+            $('#sentBtn').attr('disabled', 'true');
+            // 检查邮箱地址格式
+            checkEmail()
+            // 1. check email
+            var newEmail = undefined;
+            if (oldEmail != $('#email').val()) {
+                newEmail = $('#email').val();
+            }
+
+            // 4. submit
+            $.ajax({
+                type: "POST",
+                url: "/coros/account/activate/mail/send.do?accessToken=" + accessToken,
+                contentType: 'application/json',//传递参数类型
+                data: JSON.stringify({newEmail: newEmail}),
+                dataType: "json",// parameter
+                success: function (data) {
+                    $('#sentBtn').attr('disabled', null);
+                    if (data) {
+                        if (data.result === "0000" && data.data) {
+                            $('#sentBtn').text("Resend verification email");//成功
+                            $("#tips").text("Email has been sent!");//错误
+                        } else if (data.result === '2006') {
+                            $("#tips").text('Email address is activated!');
+                        } else if (data.result === '2005') {
+                            $("#tips").text('emal is exist!');
+                        } else {
+                            $("#tips").text('');
+                        }
+                    } else if (data) {
+                        $("#tips").text("System Error!");//错误
+                        return false;
+                    }
+                },
+                error: function (xhr, errorInfo, ex) {
+                    $('#sentBtn').attr('disabled', null);
+                    show.append('error invoke!errorInfo:' + errorInfo + '<br/>');
+                }
+            });
+        });
+    })
+
+    //检查邮箱地址是否已经激活
+    function checkEamilIsActivated() {
+        // 邮箱地址格式是否正确
+        if (!checkEmail()) {
+            return false;
+        }
+        // 2. 调用post接口请求,检查邮箱地址是否已经被激活
+        var email = $('#email').val();
+        $.ajax({
+            type: "POST",
+            url: "/coros/account/email/activated/check.do?accessToken=" + accessToken,
+            contentType: 'application/json',//传递参数类型
+            data: JSON.stringify({email: email}),
+            dataType: "json",// parameter
+            success: function (data) {
+                if (data && data.result === "0000") {
+                    if (data.data && data.data.activateStatus) {
+                        $('#sentBtn').attr('disabled', "true");
+                        $("#tips").text('Email address is activated!');
+                    } else {
+                        $('#sentBtn').attr('disabled', null);
+                        $("#tips").text('');
+                    }
+                } else if (data) {
+//                    $("#tips").text("System Error!");
+                    $("#tips").text(data.message);
+                    $('#sentBtn').attr('disabled', 'true');
+                    return false;
+                }
+            },
+            error: function (xhr, errorInfo, ex) {
+//                show.append('error invoke!errorInfo:' + errorInfo + '<br/>');
+            }
+        });
+    }
+
+
+</script>
+</body>
+</html>

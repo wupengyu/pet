@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 设备使用信息mapper -->
+<mapper namespace="com.yf.pet.dao.wristband.WristbandUserDao">
+    <!-- 设备使用信息map对象 -->
+    <resultMap id="WristbandUserMap" type="com.yf.pet.entity.wristband.WristbandInfo">
+        <result column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="client_type" property="clientType"/>
+        <result column="app_version" property="appVersion"/>
+        <result column="mobile_name" property="mobileName"/>
+        <result column="system_version" property="systemVersion"/>
+        <result column="release_type" property="releaseType"/>
+        <result column="mac" property="mac"/>
+        <result column="uuid" property="uuid"/>
+        <result column="device_id" property="deviceId"/>
+        <result column="algorithm_version" property="algorithmVersion"/>
+        <result column="firmware_version" property="firmwareVersion"/>
+        <result column="firmware_type" property="firmwareType"/>
+        <result column="gps_firmware_version" property="gpsFirmwareVersion"/>
+        <result column="gps_chip_version" property="gpsChipVersion"/>
+        <result column="last_sync_timestamp" property="lastSyncTimestamp"/>
+        <result column="timezone" property="timezone"/>
+        <result column="activate_time" property="activateTime"/>
+        <result column="create_date" property="createDate"/>
+        <result column="update_date" property="updateDate"/>
+    </resultMap>
+
+    <!-- 新增设备使用信息 -->
+    <insert id="addWristbandUsers">
+        INSERT INTO t_wristband_user(id,user_id,client_type,app_version,mobile_name,system_version,release_type,mac,
+        device_id,algorithm_version,firmware_version,firmware_type,gps_firmware_version,gps_chip_version,last_sync_timestamp,
+        timezone,create_date,update_date)
+        VALUES
+        <foreach collection="list" index="index" item="item" separator=",">
+            (#{item.id},#{item.userId},#{item.clientType},#{item.appVersion},#{item.mobileName},#{item.systemVersion},
+            #{item.releaseType},#{item.mac},#{item.deviceId},#{item.algorithmVersion},#{item.firmwareVersion},
+            #{item.firmwareType},#{item.gpsFirmwareVersion},#{item.gpsChipVersion},#{item.lastSyncTimestamp},#{item.timezone},
+            #{item.createDate},#{item.updateDate})
+        </foreach>
+    </insert>
+
+    <!--查询用户设备使用信息-->
+    <select id="findWristbandUserList" resultMap="WristbandUserMap">
+        SELECT id,user_id,client_type,app_version,mobile_name,system_version,release_type,mac,
+        device_id,algorithm_version,firmware_version,firmware_type,gps_firmware_version,gps_chip_version,last_sync_timestamp,
+        timezone,create_date,update_date
+        FROM t_wristband_user
+        <where>
+            <foreach collection="list" index="index" item="item" open="(" separator="or" close=")">
+                user_id = #{item.userId}
+                and device_id = #{item.deviceId}
+            </foreach>
+        </where>
+    </select>
+
+    <select id="findWristbandUser" resultMap="WristbandUserMap">
+        SELECT id,user_id,client_type,app_version,mobile_name,system_version,release_type,mac,
+        device_id,algorithm_version,firmware_version,firmware_type,gps_firmware_version,gps_chip_version,last_sync_timestamp,
+        timezone,create_date,update_date
+        FROM t_wristband_user
+        <where>
+            user_id = #{userId}
+            and device_id = #{deviceId}
+        </where>
+    </select>
+
+    <!--更新设备使用信息-->
+    <update id="updateWristbandUsers">
+        <foreach collection="list" index="index" item="item" separator=";">
+            UPDATE t_wristband_user
+            set
+            client_type=#{item.clientType},
+            app_version=#{item.appVersion},
+            mobile_name=#{item.mobileName},
+            system_version=#{item.systemVersion},
+            release_type=#{item.releaseType},
+            algorithm_version=#{item.algorithmVersion},
+            firmware_version=#{item.firmwareVersion},
+            firmware_type=#{item.firmwareType},
+            gps_firmware_version=#{item.gpsFirmwareVersion},
+            gps_chip_version=#{item.gpsChipVersion},
+            last_sync_timestamp=#{item.lastSyncTimestamp},
+            timezone=#{item.timezone},
+            update_date=#{item.updateDate}
+            where user_id=#{item.userId}
+            and device_id=#{item.deviceId}
+        </foreach>
+    </update>
+</mapper>

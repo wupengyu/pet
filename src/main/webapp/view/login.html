@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>登录</title>
+    <link href="../accset/common/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet">
+    <style type="text/css">
+        .logindiv {
+            width: 300px;
+            margin-top: 200px;
+        }
+
+        .butdiv {
+            width: 112px;
+        }
+    </style>
+</head>
+<body>
+<div class="logindiv center-block">
+    <div class="form-group">
+        <input id="userNameInput" type="text" class="form-control" id="exampleInputEmail1" placeholder="用户名">
+    </div>
+    <div class="form-group">
+        <input id="passwordInput" type="password" class="form-control" id="exampleInputPassword1" placeholder="密码">
+    </div>
+    <div class="butdiv form-group center-block form-inline">
+        <button id="clearBut" class="btn btn-primary" type="submit">重置</button>
+        <button id="loginBut" class="btn btn-success" type="submit">登录</button>
+    </div>
+</div>
+
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="messageModal" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">
+                    Message
+                </h4>
+            </div>
+            <div id="errorMessage" class="modal-body">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 引入js文件 -->
+<script type="text/javascript" src="../accset/common/jquery-2.1.4.js"></script>
+<script type="text/javascript" src="../accset/common/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../accset/common/jquery-tools/jquery.md5.js"></script>
+</body>
+<!-- 页面脚步 -->
+<script type="text/javascript">
+
+    $(function () {
+        $('#clearBut').click(function () {
+            $('#userNameInput').val('');
+            $('#passwordInput').val('');
+        });
+        $('#loginBut').click(function () {
+            // 1. 验证密码是否正确
+            var account = $('#userNameInput').val();
+            var pwd = $('#passwordInput').val();
+            // 2. 密码不能为空
+            if (pwd == undefined || pwd.trim() == '' || account == undefined || account.trim() == '') {
+                $('#errorMessage').html('用户名密码不能为空');
+                $('#messageModal').modal('show');
+                return false;
+            }
+            pwd = $.md5(pwd);
+            // 2. 提交数据
+            $.ajax({
+                type: "POST",
+                url: "/coros/admin/user/login.do",
+                contentType: 'application/json',//传递参数类型
+                data: JSON.stringify({account: account, pwd: pwd}),
+                dataType: "json",// 接收参数类型
+                success: function (data) {
+                    if (data && data.result === "0000") {
+                        location.href = "index.html";
+                        // 记录用户信息
+                        sessionStorage.setItem('accessToken', data.data.accessToken);
+                        sessionStorage.setItem('userId', data.data.id);
+                    } else if (data) {
+                        $('#errorMessage').html(data.message);
+                        $('#messageModal').modal('show');
+                        sessionStorage.clear();
+                        return false;
+                    }
+                },
+                error: function (xhr, errorInfo, ex) {
+                    sessionStorage.clear();
+                    show.append('error invoke!errorInfo:' + errorInfo + '<br/>');
+                },
+            });
+        })
+    });
+</script>
+</html>

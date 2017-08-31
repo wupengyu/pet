@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<!-- saved from url=(0042)https://v4.bootcss.com/examples/dashboard/ -->
+<html lang="cn">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<head>
+    <link href="../../accset/common/bootstrap4.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <!--<link rel="stylesheet" href="../../accset/common/amazeui/css/amazeui.min.css"/>-->
+</head>
+<style>
+    .yflabel {
+        width: 100%;
+        display: block !important;
+    }
+
+    .tips {
+        color: #ff3749;
+    }
+
+    .am-divider-default {
+        border-top: 1px solid #ddd;
+    }
+
+    .am-divider {
+        height: 0;
+        /*margin: 1.5rem auto;*/
+        overflow: hidden;
+        clear: both;
+    }
+
+    hr {
+        display: block;
+        padding: 0;
+        border: 0;
+        height: 0;
+        border-top: 1px solid #eee;
+        -webkit-box-sizing: content-box;
+        box-sizing: content-box;
+    }
+
+    .h4, .h5, .h6, h4, h5, h6 {
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+
+    .h5, .h6, h1, h2, h3, h4, h5, h6 {
+        font-family: inherit;
+        font-weight: 500;
+        line-height: 1.1;
+        color: inherit;
+    }
+</style>
+
+<body>
+<h5>上传固件信息</h5>
+<hr data-am-widget="divider" style="" class="am-divider am-divider-default"/>
+<div class="table-responsive text-left col-md-8">
+    <form id="firmwareForm" action="/coros/firmware/upload.do" method="post" enctype="multipart/form-data">
+        <div class="form-group form-inline">
+            <label class="col-md-3 text-right yflabel" for="firmwareType">固件类型</label>
+            <input type="text" class="form-control col-md-9 text-lowercase" name="firmwareType" id="firmwareType"
+                   placeholder="coros m1" required>
+        </div>
+        <div class="form-group form-inline">
+            <label class="col-md-3 text-right yflabel" for="firmwareVersion">固件版本号</label>
+            <input type="text" class="form-control col-md-9" name="firmwareVersion" id="firmwareVersion"
+                   placeholder="x.x.x.x" required>
+        </div>
+        <div class="checkbox form-group form-inline">
+            <label class="col-md-3 text-right yflabel" for="androidFirmware">发布Android版本固件</label>
+            <label class="col-md-9" style="width:100%;display:block">
+                <input type="checkbox" name="androidFirmware" id="androidFirmware">（选择表示发布，可同时发布Android和iOS版本固件）
+            </label>
+        </div>
+        <div class="checkbox form-group form-inline">
+            <label class="col-md-3 text-right yflabel" for="iosFirmware">发布IOS版本固件</label>
+            <label class="col-md-9" style="width:100%;display:block">
+                <input type="checkbox" name="iosFirmware" id="iosFirmware">（选择表示发布，可同时发布Android和iOS版本固件）
+            </label>
+        </div>
+
+        <div class="form-group form-inline">
+            <label class="col-md-3 text-right yflabel" for="releaseType">发布类型</label>
+            <select class="form-control col-md-9" name="releaseType" id="releaseType">
+                <option value="3">内测版本</option>
+                <option value="2">公测版本</option>
+                <option value="1">发布版本</option>
+            </select>
+        </div>
+        <div class=" form-group form-inline">
+            <P class="col-md-3"></P>
+            <label class="col-md-9" style="width:100%;display:block">
+                <input class="" type="checkbox" name="forceUpdate" id="forceUpdate"> 是否强制更新
+            </label>
+        </div>
+        <div class="form-group form-inline">
+            <label class="col-md-3 text-right yflabel" for="firmwareFile">固件压缩文件</label>
+            <input type="file" name="firmwareFile" id="firmwareFile" required>
+            <!--<p class="help-block">Example block-level help text here.</p>-->
+        </div>
+        <div class="form-group form-inline">
+            <label class="col-md-3 text-right yflabel" for="content">更新内容</label>
+            <textarea class="form-control col-md-9" rows="3" name="content" id="content"></textarea>
+        </div>
+        <div class="form-group form-inline">
+            <label class="col-md-3 text-right yflabel" for="remarks">备注</label>
+            <textarea class="form-control col-md-9" rows="3" name="remarks" id="remarks"
+                      placeholder="此版本备注信息，运维需要，不提供给APP显示"></textarea>
+        </div>
+
+        <hr data-am-widget="divider" style="" class="am-divider am-divider-default"/>
+        <div class=" form-group form-inline">
+            <p class="col-md-3"></p>
+            <p class="col-md-9 tips" id="tips"></p>
+        </div>
+        <div class=" form-group form-inline">
+            <p class="col-md-3"></p>
+            <div class="col-md-9">
+                <button id="uploadFirmwareBtn" type="submit" class="btn btn-success">提交</button>
+            </div>
+        </div>
+        <input class="text-hide" id="accessToken" name="accessToken" value="">
+    </form>
+</div>
+<!--<script src="../../accset/common/bootstrap4.0.0/js/bootstrap.min.js"/>-->
+<script src="../../accset/common/jquery/3.2.1/jquery-3.2.1.js"></script>
+<!--<script src="../../accset/biz/zepto/zepto.js"></script>-->
+<script src="../../accset/common/jquery/jquery.form.js"></script>
+<script>
+
+    // wait for the DOM to be loaded
+    $(document).ready(function () {
+        // 1. 获得token
+        var accessToken = sessionStorage.getItem('accessToken');
+        if (accessToken == undefined || accessToken.trim() === '') {
+            location.href = "../login.html";
+        }
+        $('#accessToken').attr('value', accessToken);
+        console.log(accessToken);
+
+        /**
+         * 绑定form表达提交动作
+         */
+        $('#firmwareForm').submit(function () {
+            $('#tips').text("正在上传,请稍等");
+            // 禁用按钮
+            $('#uploadFirmwareBtn').addClass('disabled');
+
+
+            // 检查参数
+            var firmwareType = $('#firmwareType').val();
+            var firmwareVersion = $('#firmwareVersion').val();
+            var androidFirmware = $("#androidFirmware").prop("checked")
+            var iosFirmware = $("#iosFirmware").prop("checked")
+            var firmwareFile = $('#firmwareFile').val();
+            if (firmwareType == undefined || firmwareType == ""
+                    || firmwareVersion == undefined || firmwareVersion == ""
+                    || (!androidFirmware && !iosFirmware)
+                    || firmwareFile == undefined || firmwareFile == "") {
+                $('#tips').text("信息填写不完整")
+//                $('#uploadFirmwareBtn').prop('disabled', true);
+                $('#uploadFirmwareBtn').removeClass('disabled')
+                return false;
+            }
+            // 2. 判断文件大小
+            var file = document.getElementById("firmwareFile").files[0];
+            if (10485760 < file.size) {
+                $('#tips').text("固件压缩文件不能超过10Mb");
+                $('#uploadFirmwareBtn').removeClass('disabled')
+                return false;
+            }
+            // 3. app版本号正则表达式验证
+            var appRE = /^[0-9.]{1,}$/;
+            if (!appRE.test(firmwareVersion)) {
+                $('#tips').text("版本号错误")
+                $('#uploadFirmwareBtn').removeClass('disabled')
+                return false;
+            }
+
+            // 提交表单
+            $(this).ajaxSubmit(function (data) {
+                $('#uploadFirmwareBtn').removeClass('disabled')
+                $('#tips').text(data.message)
+            });
+            // 为了防止普通浏览器进行表单提交和产生页面导航（防止页面刷新？）返回false
+            $('#uploadFirmwareBtn').removeClass('disabled')
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

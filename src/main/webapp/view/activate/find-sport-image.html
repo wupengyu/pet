@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<head>
+</head>
+<body>
+<div class="wrap">
+    <div>
+        accessToken: <input type="text" id="accessToken" value="9NODH46TVX6FE8ME3UGP5KGBZ89WCY9T"/><br/>
+        labelId: <input type="text" id="labelId" value="401966345180184576"/><br/>
+    </div>
+    <div class="pft">
+        <button class="btn" id="sentBtn">Sent</button>
+    </div>
+</div>
+<script src="http://zeptojs.com/zepto.js"></script>
+<script>
+    // 3. 页面启动后执行
+    $(function () {
+        // 事件绑定
+        $('#sentBtn').click(function () {
+            var accessToken = $('#accessToken').val();
+            var labelId = $('#labelId').val();
+            // 4. submit
+            $.ajax({
+                type: "POST",
+                url: "/coros/sport/data/img/find.do?accessToken=JPN3B35B83W367YEGIZ0TH8P0G2QHMJT",
+                contentType: 'application/json',//传递参数类型
+                data: '{"labelId":401966345180184576}',
+                dataType: "json",// parameter
+                success: function (data) {
+                    if (data) {
+                        console.log("true");
+                    } else if (data) {
+                        $("#tips").text("System Error!");//错误
+                        return false;
+                    }
+                },
+                error: function (xhr, errorInfo, ex) {
+//                    show.append('error invoke!errorInfo:' + errorInfo + '<br/>');
+                }
+            });
+        });
+    })
+
+
+</script>
+</body>
+</html>

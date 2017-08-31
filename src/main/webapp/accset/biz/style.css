@@ -1,0 +1,186 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+div, ul, ol, li, a, span, i, input, form {
+    box-sizing: border-box;
+}
+
+ul, ol, li {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+em, i {
+    font-style: normal;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: none;
+}
+
+body {
+    background: #f5f5f5;
+    font-size: 14px;
+    line-height: 1.8em;
+    font-family: "Helvetica Neue", Helvetica, "Microsoft YaHei", Arial, Verdana, sans-serif;
+    font-size: 20px;
+}
+
+input, textarea, select {
+    -webkit-appearance: none;
+    border-radius: 0;
+}
+
+.small {
+    font-size: 12px;
+}
+
+.main {
+    width: 551px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.logo img {
+    width: 299px;
+    margin: 100px auto 92px;
+}
+
+.bar img {
+    width: 100%;
+    margin: 0 auto 5px;
+}
+
+h1 {
+    width: 540px;
+    height: 50px;
+    margin: 0 auto 30px;
+    color: #574751;
+    font-size: 47px;
+    text-align: justify;
+    text-align-last: justify;
+}
+
+h1.change {
+    margin-top: 30px;
+    text-align: center;
+    text-align-last: center;
+}
+
+.tips {
+    margin-top: 40px;
+    color: #ff3749;
+}
+
+.message {
+    margin-top: 40px;
+    color: #000000;
+}
+
+.fm {
+    margin-top: 110px;
+    position: relative;
+}
+
+.inp,
+.btn {
+    width: 530px;
+    border: none;
+    font-size: 20px;
+}
+
+.inp {
+    padding: 8px 3px;
+    height: 50px;
+    border-bottom: 2px solid #ff828e;
+    background: none;
+    outline: none;
+    color: #574751;
+}
+
+.btn {
+    height: 60px;
+    margin: 25px auto 50px;
+    background: #e0d112;
+    border-radius: 8px;
+    color: #fff;
+}
+
+.fm-tips {
+    width: 524px;
+    margin: 0 auto;
+    text-align: left;
+    color: #aaa;
+}
+
+.inp-exp {
+    position: absolute;
+    right: 5px;
+    top: 2px;
+    color: #aaa;
+    padding-left: 30px;
+    cursor: pointer;
+}
+
+.inp-exp input[type=checkbox] {
+    display: none;
+}
+
+.inp-exp input[type=checkbox] + label:before {
+    content: "";
+    position: absolute;
+    top: 5px;
+    left: 0;
+    display: block;
+    margin-right: 5px;
+    width: 25px;
+    height: 25px;
+    vertical-align: middle;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+.inp-exp input:checked + label:after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 6px;
+    display: block;
+    width: 9px;
+    height: 9px;
+    background: #1abc9c;
+}
+
+.inp-exp input:checked[type=checkbox] + label:after {
+    width: 19px;
+    height: 11px;
+    top: 5px;
+    left: 2px;
+    background: none;
+    border-radius: 0;
+    border: 5px solid #e0d112;
+    border-width: 0 0 5px 5px;
+    transform: rotate(-45deg);
+}
+
+.inp-exp {
+    position: absolute;
+    right: 5px;
+    top: 2px;
+    color: #aaa;
+    padding-left: 30px;
+    cursor: pointer;
+}
+
+.inp-exp {
+    _display: none;
++ display: none;
+    display: none \0;
+}

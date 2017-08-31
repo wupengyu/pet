@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--验证码日志Mapper-->
+<mapper namespace="com.yf.pet.dao.checkcode.CodeRequestLogDao">
+    <!--验证码查询返回结果-->
+    <resultMap id="codeLogResultMap" type="com.yf.pet.entity.checkcode.CodeRequestLog">
+        <result column="uuid" property="uuid"/>
+        <result column="remote_ip_address" property="remoteIPAddress"/>
+        <result column="remote_ip_num" property="remoteIPNum"/>
+        <result column="create_date" property="createDate"/>
+        <result column="days" property="days"/>
+        <result column="account" property="account"/>
+        <result column="tag" property="tag"/>
+    </resultMap>
+
+    <!-- 新增验证码日志信息 -->
+    <insert id="addCodeRequestLog">
+        INSERT INTO t_code_request_log(uuid,remote_ip_address,remote_ip_num,create_date,account,tag)
+        VALUES(#{uuid},#{remoteIPAddress},#{remoteIPNum},#{createDate},#{account},#{tag})
+    </insert>
+
+    <!--查询验证码日志信息-->
+    <select id="findCodeRequestLog" resultMap="codeLogResultMap">
+        SELECT
+        uuid,remote_ip_address,remote_ip_num,create_date,account,tag
+        FROM t_code_request_log
+        <where>
+            account = #{account}
+            and check_code = #{checkCode}
+        </where>
+    </select>
+
+    <!--查询用户当天获取到的验证码次数-->
+    <select id="findCodeRequestLogNumByMobileAndDay" resultType="java.lang.Integer">
+        SELECT
+        count(1)
+        FROM t_code_request_log
+        <where>
+            account = #{account}
+            and tag = #{tag}
+        </where>
+    </select>
+
+    <!--查询一个IP当天获取的验证码次数-->
+    <select id="findCountByIPNumAndDay" resultType="java.lang.Integer">
+        SELECT
+        count(1)
+        FROM t_code_request_log
+        <where>
+            remote_ip_num = #{remoteIPNum}
+            AND tag = #{actionType}
+            AND DATE(create_date) = CURDATE()
+        </where>
+    </select>
+
+</mapper>

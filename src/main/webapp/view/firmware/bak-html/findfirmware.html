@@ -1,0 +1,331 @@
+<!doctype html>
+<html class="no-js">
+<head>
+    <meta charset="utf-8">
+    <title>固件查询</title>
+    <meta name="description" content="固件查询">
+    <link rel="stylesheet" href="../../accset/common/amazeui/css/amazeui.min.css"/>
+    <link rel="stylesheet" href="../../accset/common/amazeui/plugins/css/amazeui.datatables.css"/>
+    <link href="../../accset/common/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="../../accset/common/base/base.css" rel="stylesheet"/>
+    <style type="text/css">
+        /*.am-yf-button {*/
+        /*margin-bottom: 10px;*/
+        /*}*/
+
+        .am-yf-table th,
+        .am-yf-table td {
+            /*width: 200px !important;*/
+            word-wrap: break-word;
+            word-break: break-all;
+        }
+
+        .am-yf-table .am-yf-min-width {
+            width: 10% !important;
+        }
+
+        .am-yf-table .am-yf-max-width {
+            width: 10% !important;
+        }
+
+        th.sorted.ascending:after {
+            content: "\2191";
+        }
+
+        th.sorted.descending:after {
+            content: "\2193";
+        }
+
+        table.dataTable thead .sorting,
+        table.dataTable thead .sorting_asc,
+        table.dataTable thead .sorting_desc,
+        table.dataTable thead .sorting_asc_disabled,
+        table.dataTable thead .sorting_desc_disabled {
+            background-repeat: no-repeat;
+            background-position: center right;
+        }
+
+        table.dataTable thead .sorting {
+            background-image: url("../../accset/common/amazeui/plugins/images/sort_both.png")
+        }
+
+        table.dataTable thead .sorting_asc {
+            background-image: url("../../accset/common/amazeui/plugins/images/sort_asc.png")
+        }
+
+        table.dataTable thead .sorting_desc {
+            background-image: url("../../accset/common/amazeui/plugins/images/sort_desc.png")
+        }
+
+        table.dataTable thead .sorting:after {
+            opacity: 0.2;
+            content: "";
+        }
+
+        table.dataTable thead .sorting_asc:after {
+            opacity: 0.2;
+            content: "";
+        }
+
+        table.dataTable thead .sorting_desc:after {
+            opacity: 0.2;
+            content: "";
+        }
+    </style>
+
+</head>
+<body>
+<div class="row text-center">
+    <h4>问题反馈信息查询</h4>
+</div>
+<div class="row">
+
+    <div class="col-sm-12 col-md-12 col-lg-12 am-yf-table">
+        <!--<div class="col-sm-12 col-md-12 col-lg-12">-->
+        <!--<button type="button" class="btn btn-primary " onclick="queryFeedbacks()">-->
+        <!--查询-->
+        <!--</button>-->
+        <!--</div>-->
+        <div class="form-group form-inline">
+            <label class="col-md-2 text-right yflabel" for="firmwareType">系统类型</label>
+            <select class="form-control col-md-2" name="firmwareType" id="firmwareType">
+                <option>全部</option>
+                <option>coros-m1</option>
+            </select>
+            <label class="col-md-2 text-right yflabel" for="systemType">系统类型</label>
+            <select class="form-control col-md-2" name="systemType" id="systemType">
+                <option value="0">全部</option>
+                <option value="1">Android</option>
+                <option value="2">IOS</option>
+            </select>
+            <label class="col-md-2 text-right yflabel" for="releaseType">发布类型</label>
+            <select class="form-control col-md-2" name="releaseType" id="releaseType">
+                <option value="0">全部</option>
+                <option value="1">发布版本</option>
+                <option value="2">公测版本</option>
+                <option value="3">内测版本</option>
+            </select>
+            <button id="findFirmwareBtn" onclick="queryFirmwareList()" type="button" class="btn btn-success">查询</button>
+            <button class="btn" id="findBtn">find</button>
+        </div>
+        <table class="am-table am-table-striped am-table-bordered am-table-compact" cellspacing="0" width="100%" id="firmwareTable">
+            <thead>
+            <tr>
+                <th class="am-yf-min-width">固件类型</th>
+                <th class="am-yf-max-width">固件版本</th>
+                <th class="am-yf-min-width">固件大小</th>
+                <th class="am-yf-min-width">操作系统</th>
+                <th class="am-yf-min-width">发布类型</th>
+                <th class="am-yf-min-width">是否强制更新</th>
+                <th class="am-yf-min-width">字库版本</th>
+                <th class="am-yf-min-width">字库大小</th>
+                <th class="am-yf-min-width">添加人</th>
+                <th class="am-yf-min-width">添加时间</th>
+                <th class="am-yf-min-width">删除</th>
+            </tr>
+            </thead>
+            <tfoot>
+            <tr>
+                <th class="am-yf-min-width">固件类型</th>
+                <th class="am-yf-max-width">固件版本</th>
+                <th class="am-yf-min-width">固件大小</th>
+                <th class="am-yf-min-width">操作系统</th>
+                <th class="am-yf-min-width">发布类型</th>
+                <th class="am-yf-min-width">是否强制更新</th>
+                <th class="am-yf-min-width">字库版本</th>
+                <th class="am-yf-min-width">字库大小</th>
+                <th class="am-yf-min-width">添加人</th>
+                <th class="am-yf-min-width">添加时间</th>
+                <th class="am-yf-min-width">删除</th>
+            </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+
+<script src="../../accset/common/jquery-2.1.4.js"></script>
+<script src="../../accset/common/amazeui/plugins/js/amazeui.datatables.js"></script>
+<script>
+    var accessToken='F8DR3LC6ET67E81X3DVTCST7SQH6TH1M';
+//    $(function () {
+//        accessToken = sessionStorage.getItem('accessToken');
+//        if (accessToken == undefined || accessToken.trim() === '') {
+//            location.href = "../login/login.html";
+//        } else {
+            /**
+             * 执行查询
+             * */
+//            queryFeedbacks(accessToken);
+//        }
+//    })
+
+//    $(function () {
+//        // 检查邮箱是否已经激活
+//        checkEamilIsActivated();
+//
+//        // 事件绑定
+//        $('#sentBtn').click(function () {
+
+    $(function () {
+//        $('#findFirmwareBtn').onclick(function () {
+//            queryFirmwareList(accessToken);
+////            tableInIt();
+//        })
+        $('#findBtn').click(function () {
+            queryFirmwareList(accessToken);
+        })
+    })
+
+    var firmwareTable;
+    /**
+     * 查询问题反馈信息
+     */
+    function queryFirmwareList() {
+        // post请求url传值
+        var postParamters='';
+        var firmwareType=$('#firmwareType').val();
+        if('全部'!=firmwareType){
+            postParamters='&firmwareType='+firmwareType;
+        }
+        var systemType=$('#systemType').val();
+        if(0!==systemType){
+            postParamters+='&systemType='+systemType;
+        }
+        var releaseType=$('#releaseType').val();
+        if(0!==releaseType){
+            postParamters+='&releaseType='+releaseType;
+        }
+        if(firmwareTable!=undefined){
+            firmwareTable.clear().draw();
+        }
+
+        firmwareTable = $('#firmwareTable').DataTable({
+//            retrieve: true,
+//            processing: true,
+//            errMode: 'throw',
+//            width: '600px',
+            destroy: true,
+            searching: false,
+            ajax: {
+                type: 'POST',
+                url: '/coros/firmware/list/find.do?accessToken=' + accessToken + postParamters,
+                // TODO json传值会被转码,目前只能用url传值
+//                contentType: 'application/json',//传递参数类型
+//                data: JSON.stringify({firmwareType:firmwareType,systemType:systemType,releaseType:releaseType}),
+                dataType: "json",// 接收参数类型
+                dataSrc: function (data) {
+                    if (data && data.result === "0000") {
+//                        操作列初始化
+//                        tableInIt();
+                        return data.data;
+                    } else if (data.result == "0004" || data.result == "0003") {
+                        location.href = "../login/login.html";
+                    } else if (data) {
+                        console.log(data.message);
+//                        return false;
+                    }
+                }
+            },
+            columns: [
+                {data: 'firmwareType'},
+                {data: 'firmwareVersion'},
+                {data: 'firmwareSize'},
+                {
+                    data: 'systemType',
+                    render: function (data, type, full, meta) {
+                        switch (data) {
+                            case 1:
+                                return 'Android';
+                                break;
+                            case 2:
+                                return 'IOS';
+                                break;
+                        }
+                    }
+                },
+                {
+                    data: 'releaseType',
+                    render: function (data, type, full, meta) {
+                        switch (data) {
+                            case 1:
+                                return '发布版本';
+                                break;
+                            case 2:
+                                return '公测版本';
+                                break;
+                            case 3:
+                                return '内测版本';
+                                break;
+                        }
+                    }
+                },
+                {
+                    data: 'tag',
+                    render: function (data, type, full, meta) {
+                        switch (data) {
+                            case 1:
+                                return '是';
+                                break;
+                            default:
+                                return '否';
+                                break;
+                        }
+                    }
+                },
+                {data: 'fontVersion'},
+                {data: 'fontSize'},
+                {data: 'adduser'},
+                {data: 'addtime'},
+                {
+                    data: 'isShow',
+                    render: function (data, type, full, meta) {
+                        // 1. 添加删除按钮
+                        return '<a class="deletelink" href="javascript:void(0)" onclick=deleteFirmware("' + accessToken + '","' + full.id + '");>删除</a>';
+                    }
+                }
+            ]
+        })
+    }
+
+    /**
+     *table 操作列初始化
+     * */
+    function tableInIt() {
+        //2. 删除列
+        $('#firmwareTable tbody').on('click', '.deletelink', function () {
+//            方法二
+            firmwareTable.row($(this).parents('tr')).remove().draw();
+        });
+    }
+    /**
+     *把问题逻辑删除
+     * @param accessToken token
+     * @param id 问题id
+     */
+    function deleteFirmware(accessToken, id) {
+        // 1. 查询固件数据
+        $.ajax({
+            type: "POST",
+            url: "/coros/firmware/delete.do?accessToken=" + accessToken + "&id=" + id,
+            contentType: 'application/json',//传递参数类型
+            data: JSON.stringify({productType: "1"}),
+            dataType: "json",// 接收参数类型
+            success: function (data) {
+                if (data && data.result === "1000") {
+//                    $('#dg').datagrid({data: data.result}).datagrid('clientPaging');
+                } else if (data) {
+//                    $('#errorMessage').html(data.message);
+//                    $('#messageModal').modal('show');
+//                    return false;
+                }
+            },
+            error: function (xhr, errorInfo, ex) {
+                show.append('error invoke!errorInfo:' + errorInfo + '<br/>');
+            }
+        });
+    }
+
+</script>
+</body>
+</html>

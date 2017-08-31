@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="renderer" content="webkit">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1">
+<meta name="format-detection" content="telephone=no">
+<link rel="stylesheet" href="../../accset/biz/style.css">
+<head>
+    <meta charset="UTF-8">
+    <title>Verify Email</title>
+</head>
+<body>
+<div class="wrap">
+    <div class="main">
+        <div class="logo"><img src="../../accset/image/logo.png"></div>
+        <div class="bar"><img src="../../accset/image/bar.png"></div>
+        <p class="message" id="message"></p>
+    </div>
+</div>
+<script src="../../accset/biz/zepto/zepto.js"></script>
+<script>
+    //query parameter
+    function request(strName) {
+        var strHref = window.document.location.href;
+        var intPos = strHref.indexOf("?");
+        var strRight = strHref.substr(intPos + 1);
+        var arrTmp = strRight.split("&");
+        for (var i = 0; i < arrTmp.length; i++) {
+            var arrTemp = arrTmp[i].split("=");
+            if (arrTemp[0].toUpperCase() == strName.toUpperCase())
+                return arrTemp[1];
+        }
+        return "";
+    }
+
+    // 获得token
+    var userId = request('userId');
+    var checkCode = request('checkCode');
+    var activateType = request('activateType');
+    var email = request('email');
+
+    // 事件绑定
+    $(function () {
+        // 4. submit
+        $.ajax({
+            type: "POST",
+            url: "/coros/account/from/mail/activate.do",
+            contentType: 'application/json',//传递参数类型
+            data: JSON.stringify({userId: userId, checkCode: checkCode, email: email, activateType: activateType}),
+            dataType: "json",// parameter
+            success: function (data) {
+                if (data && data.result === "0000") {
+                    $("#message").html('successful');
+//                    提示语修改要和产品定义的一样
+//                    $("#message").html('Email address has been activated');
+                } else if (data) {
+                    $('#message').html(data.message)
+                    return false;
+                }
+            },
+            error: function (xhr, errorInfo, ex) {
+                show.append('error invoke!errorInfo:' + errorInfo + '<br/>');
+            }
+        });
+    });
+</script>
+</body>
+</html>

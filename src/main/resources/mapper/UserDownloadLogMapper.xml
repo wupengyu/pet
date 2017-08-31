@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 用户下载固件记录信息mapper -->
+<mapper namespace="com.yf.pet.dao.firmware.UserDownloadLogDao">
+    <!-- 用户下载固件记录信息map对象 -->
+    <resultMap id="UserDownloadLogMap" type="com.yf.pet.entity.firmware.UserDownloadLog">
+        <result column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="app_version" property="appVersion"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <insert id="saveUserDownloadLog">
+        INSERT INTO t_user_download_log(id,user_id,app_version,status,create_time)
+        VALUES(#{id},#{userId},#{appVersion},#{status},#{createTime})
+    </insert>
+
+    <update id="modifyStatusByUserIdAndVersion">
+        UPDATE t_user_download_log
+        set status=#{status}
+        where userid=#{userId}
+        and app_version=#{appVersion}
+        and status=0
+    </update>
+
+    <select id="queryLogByUserIdAndVersion" resultMap="UserDownloadLogMap">
+        SELECT id,user_id,app_version,status,create_time
+        FROM t_user_download_log
+        WHERE  user_id = #{userId}
+        and app_version = #{appVersion}
+        order by create_time desc limit 1
+    </select>
+</mapper>

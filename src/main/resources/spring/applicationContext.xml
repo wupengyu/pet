@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/aop
+http://www.springframework.org/schema/aop/spring-aop.xsd
+http://www.springframework.org/schema/context
+http://www.springframework.org/schema/context/spring-context.xsd
+http://www.springframework.org/schema/mvc
+http://www.springframework.org/schema/mvc/spring-mvc.xsd
+http://www.springframework.org/schema/util
+http://www.springframework.org/schema/util/spring-util.xsd">
+
+
+    <!--加载配置xml文件-->
+    <import resource="classpath:spring/jdbc.xml"/>
+
+    <!--javaMelody 监控使用-->
+    <import resource="classpath:net/bull/javamelody/monitoring-spring-aspectj.xml"/>
+
+
+    <aop:aspectj-autoproxy expose-proxy="true"/>
+    <!--controller 注入配置-->
+    <context:component-scan base-package="com.yf.pet.controller" annotation-config="true">
+        <context:include-filter type="annotation" expression="org.springframework.web.bind.annotation.RestController"/>
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Service"/>
+    </context:component-scan>
+
+    <context:component-scan base-package="com.yf.pet.service.impl">
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+
+    <!-- 可以使用这方式配置拦截器 -->
+    <mvc:interceptors>
+        <!--自定义异常拦截器-->
+        <bean class="com.yf.pet.authentication.interceptor.ExceptionInterceptor"></bean>
+        <!-- 会话过期拦截器的配置。判断token是否过期-->
+        <bean class="com.yf.pet.authentication.interceptor.AuthInterceptor"/>
+    </mvc:interceptors>
+
+
+
+    <!-- 配置Fastjson支持 -->
+    <!-- 时间格式转换成yyyy-MM-dd hh:mm:ss -->
+    <!-- com.alibaba.fastjson.serializer.SerializerFeature.UseISO8601DateFormat 时间转换yyyy-MM-ddThh:mm:ss，中间会有t -->
+    <util:constant id="writeDateUseDateFormat"
+                   static-field="com.alibaba.fastjson.serializer.SerializerFeature.WriteDateUseDateFormat"/>
+    <mvc:annotation-driven>
+        <mvc:message-converters register-defaults="true">
+            <bean
+                    class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+                <property name="supportedMediaTypes">
+                    <list>
+                        <!-- <value>text/html;charset=UTF-8</value> -->
+                        <value>application/json</value>
+                    </list>
+                </property>
+                <property name="features">
+                    <list>
+                        <ref bean="writeDateUseDateFormat"/>
+                    </list>
+                </property>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+
+    <!-- SpringMVC上传文件时，需要配置MultipartResolver处理器 -->
+    <bean id="multipartResolver"
+          class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="defaultEncoding" value="UTF-8"/>
+        <!-- 指定所上传文件的总大小不能超过400KB ()。注意maxUploadSize属性的限制不是针对单个文件，而是所有文件的容量之和 -->
+        <!-- <property name="maxUploadSize" value="1048576"/> -->
+    </bean>
+
+
+    <!-- 邮件服务器,邮件服务器要提取成公共内容 start -->
+    <!--<context:property-placeholder location="classpath*:email.properties" ignore-unresolvable="true"/>-->
+    <bean id="javaMailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+        <property name="protocol" value="${email.protocol}"/>
+        <property name="host" value="${email.host}"/>
+        <property name="port" value="587"/>
+        <property name="username" value="${email.username}"/>
+        <property name="password" value="${email.password}"/>
+        <property name="javaMailProperties">
+            <props>
+                <prop key="mail.smtp.auth">${email.auth}</prop>
+                <prop key="mail.smtp.starttls.enable">${email.starttls}</prop>
+            </props>
+        </property>
+    </bean>
+    <bean id="accountEmailServiceImpl" class="com.yf.pet.service.impl.CorosEmailServiceImpl">
+        <property name="javaMailSender" ref="javaMailSender"></property>
+        <property name="systemEmail" value="${email.systemEmail}"></property>
+    </bean>
+    <!-- 邮件服务器,邮件服务器要提取成公共内容 end -->
+
+</beans>
