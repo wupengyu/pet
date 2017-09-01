@@ -40,11 +40,10 @@ http://www.springframework.org/schema/util/spring-util.xsd">
     <!-- 可以使用这方式配置拦截器 -->
     <mvc:interceptors>
         <!--自定义异常拦截器-->
-        <bean class="com.yf.pet.authentication.interceptor.ExceptionInterceptor"></bean>
+        <bean class="com.yf.pet.common.authentication.interceptor.ExceptionInterceptor"></bean>
         <!-- 会话过期拦截器的配置。判断token是否过期-->
-        <bean class="com.yf.pet.authentication.interceptor.AuthInterceptor"/>
+        <bean class="com.yf.pet.common.authentication.interceptor.AuthInterceptor"/>
     </mvc:interceptors>
-
 
 
     <!-- 配置Fastjson支持 -->
@@ -95,7 +94,7 @@ http://www.springframework.org/schema/util/spring-util.xsd">
             </props>
         </property>
     </bean>
-    <bean id="accountEmailServiceImpl" class="com.yf.pet.service.impl.CorosEmailServiceImpl">
+    <bean id="accountEmailServiceImpl" class="com.yf.pet.service.impl.PetEmailService">
         <property name="javaMailSender" ref="javaMailSender"></property>
         <property name="systemEmail" value="${email.systemEmail}"></property>
     </bean>

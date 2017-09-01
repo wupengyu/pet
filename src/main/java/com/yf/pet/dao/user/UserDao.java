@@ -22,10 +22,61 @@ public interface UserDao {
     /**
      * 查询帐号是否已经注册过
      *
-     * @param account 帐号信息,根据mobile,email,facebookId,weixinId来查询
-     * @return 查到的个数
+     * @param email
+     * @param openId
+     * @return
      */
-    Integer findAccountIsExist(User user);
+    Integer findAccountIsExist(@Param("email") String email, @Param("openId")String openId );
 
+    /**
+     * 验证accessToken是否有效
+     *
+     * @param accessToken
+     * @return 用户ID, token过期时间信息
+     */
+    User findAccessTokenIsValid(@Param("accessToken") String accessToken);
 
+    /**
+     * 通过accessToken查找用户信息
+     *
+     * @param accessToken
+     * @return
+     */
+    User findByAccessToken(@Param("accessToken")String accessToken);
+
+    /**
+     * 通过email查找用户信息
+     *
+     * @param email
+     * @return
+     */
+    User findByEmail(@Param("email")String email);
+
+    /**
+     * 通过第三方账户查找用户信息
+     *
+     * @param openId
+     * @param openType
+     * @return
+     */
+    User findByOpenId(@Param("openId")String openId,@Param("openType") Integer openType);
+
+    /**
+     * 更新用户登录信息
+     *
+     * @param user
+     */
+    void updateUserLoginInfo(User user);
+
+    /**
+     * 密码重置
+     *
+     * @param user
+     */
+    void pwdReset(User user);
+
+    /**
+     * 登出
+     */
+    void updateTokenIsNull(@Param("accessToken")String accessToken);
 }

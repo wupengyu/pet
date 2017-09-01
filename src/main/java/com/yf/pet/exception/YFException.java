@@ -1,7 +1,7 @@
 package com.yf.pet.exception;
 
 
-import com.yf.pet.entity.ReturnMessageEnum;
+import com.yf.pet.common.ReturnMessageEnum;
 
 /**
  * 自定义系统异常类

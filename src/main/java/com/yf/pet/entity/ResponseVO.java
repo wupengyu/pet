@@ -4,6 +4,8 @@
 
 package com.yf.pet.entity;
 
+import com.yf.pet.common.ReturnMessageEnum;
+
 /**
  * 与Client端交互用的实体类
  *

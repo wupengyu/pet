@@ -1,6 +1,6 @@
 package com.yf.pet.controller;
 
-import com.yf.pet.authentication.annotation.DisableAuth;
+import com.yf.pet.common.authentication.annotation.DisableAuth;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
