@@ -6,9 +6,8 @@ package com.yf.pet.authentication.interceptor;
 
 import com.yf.pet.authentication.annotation.DisableAuth;
 import com.yf.pet.entity.ReturnMessageEnum;
-import com.yf.pet.entity.user.Account;
+import com.yf.pet.entity.user.User;
 import com.yf.pet.exception.YFException;
-import com.yf.pet.service.AccountService;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.slf4j.Logger;
@@ -42,7 +41,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
         HandlerMethod method = (HandlerMethod) handler;
         // 1. 判断是否鉴权
         DisableAuth auth = method.getMethod().getAnnotation(DisableAuth.class);
-        if (isDisableAuth(auth) || request.getRequestURI().equals("/swagger-ui.html")) {
+        if (isDisableAuth(auth)) {
             return super.preHandle(request, response, handler);
         }
 
@@ -53,7 +52,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
         }
 
         // 3. 查询token是否正确
-        Account account = accountService.findAccessTokenIsValid(accessToken);
+        User account = accountService.findAccessTokenIsValid(accessToken);
         if (account == null) {
             throw new YFException(ReturnMessageEnum.ACCESS_TOKEN_IS_INVALID);
         }

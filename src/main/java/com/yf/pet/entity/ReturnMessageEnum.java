@@ -181,68 +181,89 @@ public enum ReturnMessageEnum {
     CONVERT_IS_NOT_DONE("2030", "convert data is not done !"),
 
     FIRMWARE_NO_EXIST("2051", "Not found"),
-    /**
-     * 帐号已经绑定,不能中其他操作
-     */
-    ACCOUNT_IS_BIND(ModuleTypeEnum.ACCOUNT, "001", "Account has been bound"),
-    /**
-     * 只用一种帐号类型存在,不能解除绑定
-     */
-    ACCOUNT_IS_ONLY_ONE(ModuleTypeEnum.ACCOUNT, "002", "There is only one account type, cannot remove binding"),
-    /**
-     * 帐号没有绑定,比如mobile没有绑定过,不能解除mobile的绑定
-     */
-    ACCOUNT_NOT_BIND(ModuleTypeEnum.ACCOUNT, "003", "account not bind"),
-    /**
-     * 邮箱地址还没有绑定,不能激活
-     */
-    EMAIL_NOT_BIND(ModuleTypeEnum.ACCOUNT, "004", "emal not bind, cannot activate"),
+
+
+    //------------------------------------------------账户模块----------------------------------------------------------//
 
     /**
-     * 邮箱已经注册,已经存在
+     * 用户注册方式不能为空
      */
-    EMAIL_IS_EXIST(ModuleTypeEnum.ACCOUNT, "005", "emal is exist"),
-    /**
-     * 邮箱已经被激活
-     */
-    EMAIL_IS_ACTIVATED(ModuleTypeEnum.ACCOUNT, "006", "email is activated"),
-    /**
-     * 电话号码没有注册
-     */
-    MOBILE_IS_NOT_REGISTERED(ModuleTypeEnum.ACCOUNT, "007", "phone number is not registered"),
-    /**
-     * 邮箱没有注册
-     */
-    EMAIL_IS_NOT_REGISTERED(ModuleTypeEnum.ACCOUNT, "008", "email is not registered"),
-    /**
-     * 连接失效
-     */
-    LINK_INVALID(ModuleTypeEnum.ACCOUNT, "009", "Link invalid"),
-    /**
-     * 邮箱已注册,邮件已过期,请重新发送激活邮件
-     */
-    EMIL_NOT_ACTIVATED_MAIL_EXPIRED(ModuleTypeEnum.ACCOUNT, "010", "邮箱未激活,激活邮件已过期,请重新发送邮件"),
-    /**
-     * 邮箱已注册,邮件未过期,请打开激活邮件进行激活
-     */
-    EMIL_NOT_ACTIVATED_MAIL_NOT_EXPIRED(ModuleTypeEnum.ACCOUNT, "011", "邮箱已注册,邮件未过期,请打开激活邮件进行激活"),
-    /**
-     * 邮箱已经绑定,未激活
-     */
-    EMAIL_IS_BIND_NOT_ACTIVATED(ModuleTypeEnum.ACCOUNT, "012", "邮箱已经绑定,未激活,请激活"),
-    /**
-     * 帐号无效
-     */
-    ACCOUNT_IS_INVALID(ModuleTypeEnum.ACCOUNT, "013", "account is invalid"),
-    /**
-     * 帐号已经被注册，不能绑定
-     */
-    ACCOUNT_REGISTERED(ModuleTypeEnum.ACCOUNT, "014", "Account has been registered, Cannot bind"),
-    /**
-     * 邮箱已经绑定,不能重复绑定
-     */
-    EMAIL_IS_BIND(ModuleTypeEnum.ACCOUNT, "015", "emal is bind"),
+    REGISTER_TEYP_NULL(ModuleTypeEnum.ACCOUNT, "001", "register type can not be null"),
 
+    /**
+     * 邮箱不能为空
+     */
+    EMAIL_NULL(ModuleTypeEnum.ACCOUNT, "002", "email can not be null"),
+    /**
+     * 密码不能为空
+     */
+    PASSWORD_NULL(ModuleTypeEnum.ACCOUNT, "003", "password can not be null"),
+
+    /**
+     * facebook id 不能为空
+     */
+    FACEBOOK_ID_NULL(ModuleTypeEnum.ACCOUNT, "004", "facebook id can not be null"),
+
+    /**
+     * 注册时区不能为空
+     */
+    REGISTER_TIMEZONE_NULL(ModuleTypeEnum.ACCOUNT, "005", "register timezone can not be null"),
+    /**
+     * 帐号已经存在
+     */
+    ACCOUNT_IS_EXIST(ModuleTypeEnum.ACCOUNT, "006", "account is exist"),
+//    /**
+//     * 只用一种帐号类型存在,不能解除绑定
+//     */
+//    ACCOUNT_IS_ONLY_ONE(ModuleTypeEnum.ACCOUNT, "002", "There is only one account type, cannot remove binding"),
+//    /**
+//     * 帐号没有绑定,比如mobile没有绑定过,不能解除mobile的绑定
+//     */
+//    ACCOUNT_NOT_BIND(ModuleTypeEnum.ACCOUNT, "003", "account not bind"),
+//    /**
+//     * 邮箱地址还没有绑定,不能激活
+//     */
+//    EMAIL_NOT_BIND(ModuleTypeEnum.ACCOUNT, "004", "emal not bind, cannot activate"),
+//
+//    /**
+//     * 邮箱已经注册,已经存在
+//     */
+//    EMAIL_IS_EXIST(ModuleTypeEnum.ACCOUNT, "005", "emal is exist"),
+//    /**
+//     * 邮箱已经被激活
+//     */
+//    EMAIL_IS_ACTIVATED(ModuleTypeEnum.ACCOUNT, "006", "email is activated"),
+//
+//    /**
+//     * 邮箱已注册,邮件已过期,请重新发送激活邮件
+//     */
+//    EMIL_NOT_ACTIVATED_MAIL_EXPIRED(ModuleTypeEnum.ACCOUNT, "010", "邮箱未激活,激活邮件已过期,请重新发送邮件"),
+//    /**
+//     * 邮箱已注册,邮件未过期,请打开激活邮件进行激活
+//     */
+//    EMIL_NOT_ACTIVATED_MAIL_NOT_EXPIRED(ModuleTypeEnum.ACCOUNT, "011", "邮箱已注册,邮件未过期,请打开激活邮件进行激活"),
+//    /**
+//     * 邮箱已经绑定,未激活
+//     */
+//    EMAIL_IS_BIND_NOT_ACTIVATED(ModuleTypeEnum.ACCOUNT, "012", "邮箱已经绑定,未激活,请激活"),
+//    /**
+//     * 帐号无效
+//     */
+//    ACCOUNT_IS_INVALID(ModuleTypeEnum.ACCOUNT, "013", "account is invalid"),
+//    /**
+//     * 帐号已经被注册，不能绑定
+//     */
+//    ACCOUNT_REGISTERED(ModuleTypeEnum.ACCOUNT, "014", "User has been registered, Cannot bind"),
+//    /**
+//     * 邮箱已经绑定,不能重复绑定
+//     */
+//    EMAIL_IS_BIND(ModuleTypeEnum.ACCOUNT, "015", "emal is bind"),
+
+
+
+
+
+    //-----------------------------------------------------账户模块结束--------------------------------------------//
     /**
      * 时区信息为空
      */

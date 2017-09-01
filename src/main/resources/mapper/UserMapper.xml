@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 账户信息mapper -->
+<mapper namespace="com.yf.pet.dao.user.UserDao">
+    <!-- 用户账户map对象 -->
+    <resultMap id="UserAccountMap" type="com.yf.pet.entity.user.User">
+        <result column="user_id" property="userId"/>
+        <result column="mobile" property="mobile"/>
+        <result column="email" property="email"/>
+        <result column="facebook_id" property="facebookId"/>
+        <result column="facebook_name" property="facebookName"/>
+        <result column="pwd" property="pwd"/>
+        <result column="access_token" property="accessToken"/>
+        <result column="validity_date" property="validityDate"/>
+        <result column="register_type" property="registerType"/>
+        <!--<result column="client_type" property="clientType"/>-->
+        <result column="login_type" property="loginType"/>
+        <result column="ip_address" property="ipAddress"/>
+        <result column="create_date" property="createDate"/>
+        <result column="update_date" property="updateDate"/>
+        <result column="activate_status" property="activateStatus"/>
+        <result column="first_name" property="firstName"/>
+        <result column="last_name" property="lastName"/>
+        <result column="gender" property="gender"/>
+        <result column="head_pic" property="headPic"/>
+        <result column="register_timezone" property="registerTimezone"/>
+    </resultMap>
+
+    <!-- 新增用户账户信息 -->
+    <insert id="addUser" useGeneratedKeys="true" keyProperty="userId">
+        INSERT INTO
+        t_user(email,facebook_id,pwd,access_token,validity_date,
+        register_type,login_type,ip_address,create_date,activate_status,register_timezone)
+        VALUES(#{email},#{facebookId},#{pwd},#{accessToken},
+        #{validityDate},#{registerType},#{loginType},#{ipAddress},#{createDate},#{activateStatus},#{registerTimezone})
+	</insert>
+
+    <!--查看帐号是否已经被注册-->
+    <select id="findAccountIsExist" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM t_user
+        <where>
+            <if test="email != null and email !='' ">
+                OR email = #{email}
+            </if>
+            <if test="facebookId != null and facebookId !='' ">
+                OR facebook_id = #{facebookId}
+            </if>
+        </where>
+    </select>
+</mapper>
