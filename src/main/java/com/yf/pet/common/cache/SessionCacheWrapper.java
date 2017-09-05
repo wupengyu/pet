@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Tony.Tong
  */
-@Component
 public class SessionCacheWrapper {
 
     private static RedisCacheManager sessionCacheManager;

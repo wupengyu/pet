@@ -14,4 +14,11 @@ public class TestController {
     public ModelAndView  index() {
         return  new ModelAndView("index.html");
     }
+
+
+    @DisableAuth
+    @RequestMapping(value = "/hello",method = RequestMethod.GET)
+    public String  hello() {
+        return "hello";
+    }
 }

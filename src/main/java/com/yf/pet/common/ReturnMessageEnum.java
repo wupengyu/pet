@@ -72,7 +72,7 @@ public enum ReturnMessageEnum {
     /**
      * facebook id 不能为空
      */
-    FACEBOOK_ID_NULL(ModuleTypeEnum.ACCOUNT, "004", "facebook id can not be null"),
+    OPEN_ID_NULL(ModuleTypeEnum.ACCOUNT, "004", "open id can not be null"),
 
     /**
      * 注册时区不能为空

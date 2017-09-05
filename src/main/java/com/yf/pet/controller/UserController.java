@@ -46,6 +46,13 @@ public class UserController {
     @Autowired
     private UserServiceImpl userService;
 
+
+    @DisableAuth
+    @RequestMapping(value = "/",method = RequestMethod.GET)
+    public String hello(){
+        return "hello";
+    }
+
     /**
      * 用户邮箱注册
      *
@@ -63,12 +70,6 @@ public class UserController {
         if (userRegisterVo.getPwd() == null) {
             throw new YFException(ReturnMessageEnum.PASSWORD_NULL);
         }
-        if (userRegisterVo.getRegisterType() == null) {
-            throw new YFException(ReturnMessageEnum.REGISTER_TEYP_NULL);
-        }
-        if (userRegisterVo.getRegisterType() != UserRegisterEnum.EMAIL) {
-            throw new YFException(ReturnMessageEnum.REGISTER_TEYP_EMAIL);
-        }
         if (StringUtils.isEmpty(userRegisterVo.getEmail())) {
             throw new YFException(ReturnMessageEnum.EMAIL_NULL);
         }
@@ -82,11 +83,6 @@ public class UserController {
         if (isExist) {
             throw new YFException(ReturnMessageEnum.ACCOUNT_IS_EXIST);
         }
-
-        //TODO 验证邮箱验证码
-
-        // 获取用户IP地址
-        userRegisterVo.setIpAddress(getRemoteHost(request));
 
         //注册
         User user = userService.emailRegister(userRegisterVo);
@@ -117,9 +113,6 @@ public class UserController {
             throw new YFException(ReturnMessageEnum.PASSWORD_NULL);
         }
 
-        // 获取用户IP地址
-        userEmailLoginVo.setIpAddress(getRemoteHost(request));
-
         //登录
         User user = userService.emailLogin(userEmailLoginVo);
 
@@ -136,14 +129,16 @@ public class UserController {
      * @throws Exception 异常抛出
      */
     @DisableAuth
-    @RequestMapping(value = "/openaccountlogin", consumes = "application/json", produces = "application/json")
+    @RequestMapping(value = "/openlogin", consumes = "application/json", produces = "application/json")
     public ResponseVO openAccountlogin(@RequestBody UserOpenIdLoginVo userOpenIdLoginVo, HttpServletRequest request) throws Exception {
+
+        log.info("第三方用户登录："+ this.getClass().getName() + ".openAccountlogin" );
         // 检查参数
         if (userOpenIdLoginVo == null) {
             throw new YFException(ReturnMessageEnum.PARAMETER_ERROR);
         }
         if (userOpenIdLoginVo.getOpenId() == null) {
-            throw new YFException(ReturnMessageEnum.EMAIL_NULL);
+            throw new YFException(ReturnMessageEnum.OPEN_ID_NULL);
         }
         if (userOpenIdLoginVo.getOpenType() == null) {
             throw new YFException(ReturnMessageEnum.OPEN_TYPE_NULL);
@@ -153,7 +148,7 @@ public class UserController {
         }
 
         // 获取用户IP地址
-        userOpenIdLoginVo.setIpAddress(getRemoteHost(request));
+//        userOpenIdLoginVo.setIpAddress(getRemoteHost(request));
 
         //登录
         User user = userService.openLogin(userOpenIdLoginVo);
@@ -195,7 +190,7 @@ public class UserController {
      * @return
      * @throws Exception 异常抛出
      */
-    @RequestMapping(value = "/getbackpwd", consumes = "application/json", produces = "application/json")
+    @RequestMapping(value = "/forgetpwd", consumes = "application/json", produces = "application/json")
     public ResponseVO getbackpwd(@RequestBody UserOpenIdLoginVo userOpenIdLoginVo, HttpServletRequest request) throws Exception {
         //TODO
 
@@ -246,7 +241,7 @@ public class UserController {
      * @return
      * @throws Exception 异常抛出
      */
-    @RequestMapping(value = "/logout", consumes = "application/json", produces = "application/json")
+    @RequestMapping(value = "/loginout", consumes = "application/json", produces = "application/json")
     public ResponseVO logout(HttpServletRequest request) throws Exception {
         String accessToken = TokenUtils.getAuthToken(request);
         if(StringUtils.isEmpty(accessToken)){
@@ -293,20 +288,20 @@ public class UserController {
      * @return
      * @throws Exception 异常抛出
      */
-    @DisableAuth
-    @RequestMapping(value = "/sendcodetoemail", consumes = "application/json", produces = "application/json")
-    public ResponseVO sendCodeToEmail(@RequestBody UserEmailLoginVo  userEmailLoginVo, HttpServletRequest request) throws Exception {
-        // 检查参数
-        if (userEmailLoginVo == null) {
-            throw new YFException(ReturnMessageEnum.PARAMETER_ERROR);
-        }
-        if (StringUtils.isEmpty(userEmailLoginVo.getEmail())) {
-            throw new YFException(ReturnMessageEnum.EMAIL_NULL);
-        }
-        //给指定邮箱发个验证码
-
-        ResponseVO responseVO = new ResponseVO(ReturnMessageEnum.RETURN_OK);
-        return responseVO;
-    }
+//    @DisableAuth
+//    @RequestMapping(value = "/sendcodetoemail", consumes = "application/json", produces = "application/json")
+//    public ResponseVO sendCodeToEmail(@RequestBody UserEmailLoginVo  userEmailLoginVo, HttpServletRequest request) throws Exception {
+//        // 检查参数
+//        if (userEmailLoginVo == null) {
+//            throw new YFException(ReturnMessageEnum.PARAMETER_ERROR);
+//        }
+//        if (StringUtils.isEmpty(userEmailLoginVo.getEmail())) {
+//            throw new YFException(ReturnMessageEnum.EMAIL_NULL);
+//        }
+//        //给指定邮箱发个验证码
+//
+//        ResponseVO responseVO = new ResponseVO(ReturnMessageEnum.RETURN_OK);
+//        return responseVO;
+//    }
 
 }

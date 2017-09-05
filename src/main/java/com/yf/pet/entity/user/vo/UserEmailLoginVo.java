@@ -17,6 +17,4 @@ public class UserEmailLoginVo {
 
     private String email;
     private String pwd;
-    private String ipAddress;//最后登录的IP地址
-    private String phoneId;//手机设备ID，相当于收集Mac地址之类的唯一标识符
 }

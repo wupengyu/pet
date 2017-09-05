@@ -16,13 +16,8 @@ import org.springframework.stereotype.Component;
  *
  * @author wupengyu
  */
-@Component
 public class RedisUtilsPet {
 
-    /**
-     * token 过期时间 秒
-     */
-    private static long tokenExpireTime = ApplicationConstants.TOKEN_VALID_DAY_COUNT * 86400;
 
     /**
      * 根据token查询用户信息
@@ -47,8 +42,8 @@ public class RedisUtilsPet {
     public static void putUserKeyToken(User userInfo) {
 
         if (userInfo != null && StringUtils.isNotBlank(userInfo.getAccessToken())) {
-            SessionCacheWrapper.putSessionJsonExpirationTime(YFRedisCachePrefix.getProductAndMode(ProductType.PET, ProductModel.USER), userInfo.getAccessToken(),
-                    JSON.toJSONString(userInfo),tokenExpireTime);
+            SessionCacheWrapper.putSessionJson(YFRedisCachePrefix.getProductAndMode(ProductType.PET, ProductModel.USER), userInfo.getAccessToken(),
+                    JSON.toJSONString(userInfo));
         }
     }
 

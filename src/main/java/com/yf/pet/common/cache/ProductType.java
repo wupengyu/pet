@@ -24,7 +24,7 @@ public enum ProductType {
 	/**
 	 * 宠物
 	 */
-	PET("d");
+	PET("p");
 
 	private final String productType;
 

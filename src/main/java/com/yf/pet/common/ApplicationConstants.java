@@ -32,28 +32,8 @@ public class ApplicationConstants {
      */
     public static int SMS_VERIFY_CODE_VALID_BY_RESET_PWD = 172800;
 
-    public static int SMS_VERIFY_CODE_COUNT_OF_DAY = 10;// 一个手机号码，每天能申请的验证码，防止恶意申请验证码
     public final static int TOKEN_LENGTH = 32;
     public final static int TOKEN_VALID_DAY_COUNT = 30;
-
-    public final static String CLIENT_TYPE_ANDRIND = "1";
-    public final static String CLIENT_TYPE_IOS = "2";
-
-    public final static String DEFAULT_PASSWORD = "123456";
-
-    public final static int FORGET_PWD_CODE_VALID_DAY_COUNT = 3;
-
-    public final static int BUFFER_SIZE = 1024;
-
-    // 发布类型 1-正式发布， 2-公测，3-内测
-    public static String WATCH_RELEASE_TYPR_ISSUE = "1";
-    public static String WATCH_RELEASE_TYPR_BETA = "2";
-    public static String WATCH_RELEASE_TYPR_TEST = "3";
-    public final static String SERVER_STATE = "1"; // 服务器状态 1： 正常 2 ：维护
-
-    public final static int PAGE_SIZE = 10;
-    //每个页面设置最多显示多少个可以翻页的页签
-    public final static int PAGE_MENU_SIZE = 10;
 
     /**
      * 访问次数上限，包含尝试重置密码和验证验证码合法性的总和

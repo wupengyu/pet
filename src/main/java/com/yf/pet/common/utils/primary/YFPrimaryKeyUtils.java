@@ -20,19 +20,19 @@ public class YFPrimaryKeyUtils {
     /**
      * 序列号占14位
      */
-    private final static long SEQUENCE_BITS = NumberUtils.toLong(YFResourceUtil.getValueByKey("app-coros.properties", "sequence.bits"));
+    private final static long SEQUENCE_BITS = NumberUtils.toLong(YFResourceUtil.getValueByKey("resource.properties", "sequence.bits"));
     /**
      * 模块号占7位
      */
-    private final static long MODE_BITS = NumberUtils.toLong(YFResourceUtil.getValueByKey("app-coros.properties", "mode.bits"));
+    private final static long MODE_BITS = NumberUtils.toLong(YFResourceUtil.getValueByKey("resource.properties", "mode.bits"));
     /**
      * 机器码或者服务实例编号占7位
      */
-    private final static long WORKER_ID_BITS = NumberUtils.toLong(YFResourceUtil.getValueByKey("app-coros.properties", "workerid.bits"));
+    private final static long WORKER_ID_BITS = NumberUtils.toLong(YFResourceUtil.getValueByKey("resource.properties", "workerid.bits"));
     /**
      * 机器码或者服务实例编号配置(每台机器或者同一台机器上面的每个实例配置一个编号)
      */
-    private final static long WORKER_ID = NumberUtils.toLong(YFResourceUtil.getValueByKey("app-coros.properties", "workerid"));
+    private final static long WORKER_ID = NumberUtils.toLong(YFResourceUtil.getValueByKey("resource.properties", "workerid"));
 
     /**
      * 模块号位移运算左移索引

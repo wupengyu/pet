@@ -2,12 +2,12 @@ package com.yf.pet.service.impl;
 
 import com.yf.pet.common.ReturnMessageEnum;
 import com.yf.pet.common.cache.RedisUtilsPet;
+import com.yf.pet.common.utils.primary.YFPrimaryKeyUtils;
 import com.yf.pet.dao.user.UserDao;
-import com.yf.pet.entity.user.LoginTypeEnum;
+import com.yf.pet.common.enums.ServiceModeType;
 import com.yf.pet.entity.user.User;
 import com.yf.pet.common.ApplicationConstants;
 import com.yf.pet.common.utils.CodeGenerator;
-import com.yf.pet.entity.user.UserActivateStatus;
 import com.yf.pet.entity.user.UserRegisterEnum;
 import com.yf.pet.entity.user.vo.UserEmailLoginVo;
 import com.yf.pet.entity.user.vo.UserOpenIdLoginVo;
@@ -48,10 +48,10 @@ public class UserServiceImpl {
      */
     public User emailRegister(UserRegisterVo userRegisterVo) {
         User user = new User();
-        BeanUtils.copyProperties(user, userRegisterVo);
+        BeanUtils.copyProperties(userRegisterVo, user);
         user.setRegisterType(UserRegisterEnum.EMAIL);
-        user.setActivateStatus(UserActivateStatus.ACTIVATE);//邮箱激活
-        user.setLoginType(LoginTypeEnum.EMAIL);
+//        user.setActivateStatus(UserActivateStatus.ACTIVATE);//邮箱激活
+//        user.setLoginType(LoginTypeEnum.EMAIL);
         user = register(user);
         return user;
     }
@@ -72,8 +72,11 @@ public class UserServiceImpl {
                 ApplicationConstants.TOKEN_VALID_DAY_COUNT);
         user.setValidityDate(validityDate);
         user.setCreateDate(nowDate);
-        Integer userId = userDao.addUser(user);
+
+        //设置userId
+        Long userId = YFPrimaryKeyUtils.getId(ServiceModeType.USER);
         user.setUserId(userId);
+        userDao.addUser(user);
 
         //把用户信息保存到redis
         RedisUtilsPet.putUserKeyToken(user);
@@ -100,7 +103,7 @@ public class UserServiceImpl {
         }
 
         //登录逻辑
-        user = loginSave(user, userEmailLoginVo.getIpAddress(), userEmailLoginVo.getPhoneId(), LoginTypeEnum.EMAIL);
+        user = loginSave(user);
         return user;
     }
 
@@ -119,11 +122,9 @@ public class UserServiceImpl {
             if (userOpenIdLoginVo.getRegisterTimezone() == null) {
                 throw new YFException(ReturnMessageEnum.REGISTER_TIMEZONE_NULL);
             }
-
-            BeanUtils.copyProperties(user, userOpenIdLoginVo);
+            user = new User();
+            BeanUtils.copyProperties(userOpenIdLoginVo,user);
             user.setRegisterType(UserRegisterEnum.OPENID);
-            user.setActivateStatus(UserActivateStatus.NOTACTIVATE);//邮箱未激活
-            user.setLoginType(LoginTypeEnum.OPENID);
             user = register(user);
             return user;
         }
@@ -134,7 +135,7 @@ public class UserServiceImpl {
             throw new YFException(ReturnMessageEnum.PASSWORD_ERROR);
         }
         //执行登录保存
-        user = loginSave(user, userOpenIdLoginVo.getIpAddress(), userOpenIdLoginVo.getPhoneId(), LoginTypeEnum.OPENID);
+        user = loginSave(user);
         return user;
     }
 
@@ -142,12 +143,9 @@ public class UserServiceImpl {
      * 登录保存
      *
      * @param user
-     * @param ipAddress
-     * @param phoneId
-     * @param loginType
      * @return
      */
-    private User loginSave(User user, String ipAddress, String phoneId, Integer loginType) {
+    private User loginSave(User user) {
         if (!StringUtils.isEmpty(user.getAccessToken())) {
             //删除redis里以前的Key
             RedisUtilsPet.evictUserByToken(user.getAccessToken());
@@ -161,13 +159,8 @@ public class UserServiceImpl {
                 ApplicationConstants.TOKEN_VALID_DAY_COUNT);
         user.setValidityDate(validityDate);
 
-        //更新数据库用户登录信息
-        user.setIpAddress(ipAddress);
-        user.setPhoneId(phoneId);
-        user.setUpdateDate(nowDate);
-        user.setLoginType(loginType);
+        //更新数据库信息
         userDao.updateUserLoginInfo(user);
-
         //更新redis存储的用户信息
         RedisUtilsPet.putUserKeyToken(user);
         return user;
@@ -205,6 +198,9 @@ public class UserServiceImpl {
      */
     public void pwdreset(UserPwdResetVo userPwdResetVo) {
         User user = userDao.findByEmail(userPwdResetVo.getEmail());
+        if(user == null ){
+            throw new YFException(ReturnMessageEnum.ACCOUNT_IS_EXIST);
+        }
 
         //比对旧密码
         if (!userPwdResetVo.getPwd().equals(user.getPwd())) {

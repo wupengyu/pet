@@ -17,9 +17,6 @@ http://www.springframework.org/schema/util
 http://www.springframework.org/schema/util/spring-util.xsd">
 
 
-    <!--加载配置xml文件-->
-    <import resource="classpath:spring/jdbc.xml"/>
-
     <!--javaMelody 监控使用-->
     <import resource="classpath:net/bull/javamelody/monitoring-spring-aspectj.xml"/>
 
@@ -99,5 +96,10 @@ http://www.springframework.org/schema/util/spring-util.xsd">
         <property name="systemEmail" value="${email.systemEmail}"></property>
     </bean>
     <!-- 邮件服务器,邮件服务器要提取成公共内容 end -->
+
+
+    <!--加载配置xml文件-->
+    <import resource="classpath:spring/jdbc.xml"/>
+    <import resource="classpath:spring/cacheContext.xml"/>
 
 </beans>
