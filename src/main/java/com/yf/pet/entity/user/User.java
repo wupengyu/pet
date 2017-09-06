@@ -31,5 +31,6 @@ public class User {
     private String lastName;
     private Integer gender;//性别
     private String headPic;//头像
+    private Date birthday;//生日
     private Integer registerTimezone;//注册时区
 }

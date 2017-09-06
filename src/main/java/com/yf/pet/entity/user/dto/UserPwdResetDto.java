@@ -1,8 +1,6 @@
-package com.yf.pet.entity.user.vo;
+package com.yf.pet.entity.user.dto;
 
 import lombok.Data;
-
-import java.util.Date;
 
 /**
  * <p>Description:</p>
@@ -13,8 +11,8 @@ import java.util.Date;
  * @date 2017/9/1
  */
 @Data
-public class UserEmailLoginVo {
-
+public class UserPwdResetDto {
     private String email;
     private String pwd;
+    private String newPwd;//新密码
 }

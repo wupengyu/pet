@@ -1,7 +1,6 @@
-package com.yf.pet.entity.user.vo;
+package com.yf.pet.entity.user.dto;
 
 import lombok.Data;
-import org.apache.ibatis.annotations.Param;
 
 /**
  * <p>Description:</p>
@@ -12,8 +11,8 @@ import org.apache.ibatis.annotations.Param;
  * @date 2017/9/1
  */
 @Data
-public class UserPwdResetVo {
+public class UserEmailLoginDto {
+
     private String email;
     private String pwd;
-    private String newPwd;//新密码
 }

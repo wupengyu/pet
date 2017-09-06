@@ -2,6 +2,8 @@ package com.yf.pet.service.impl;
 
 import com.yf.pet.common.ReturnMessageEnum;
 import com.yf.pet.common.cache.RedisUtilsPet;
+import com.yf.pet.common.utils.YFOSSUtils;
+import com.yf.pet.common.utils.YFResourceUtil;
 import com.yf.pet.common.utils.primary.YFPrimaryKeyUtils;
 import com.yf.pet.dao.user.UserDao;
 import com.yf.pet.common.enums.ServiceModeType;
@@ -9,10 +11,7 @@ import com.yf.pet.entity.user.User;
 import com.yf.pet.common.ApplicationConstants;
 import com.yf.pet.common.utils.CodeGenerator;
 import com.yf.pet.entity.user.UserRegisterEnum;
-import com.yf.pet.entity.user.vo.UserEmailLoginVo;
-import com.yf.pet.entity.user.vo.UserOpenIdLoginVo;
-import com.yf.pet.entity.user.vo.UserPwdResetVo;
-import com.yf.pet.entity.user.vo.UserRegisterVo;
+import com.yf.pet.entity.user.dto.*;
 import com.yf.pet.exception.YFException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -21,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -43,12 +43,12 @@ public class UserServiceImpl {
     /**
      * 邮箱用户注册
      *
-     * @param userRegisterVo
+     * @param userRegisterDto
      * @return
      */
-    public User emailRegister(UserRegisterVo userRegisterVo) {
+    public User emailRegister(UserRegisterDto userRegisterDto) {
         User user = new User();
-        BeanUtils.copyProperties(userRegisterVo, user);
+        BeanUtils.copyProperties(userRegisterDto, user);
         user.setRegisterType(UserRegisterEnum.EMAIL);
 //        user.setActivateStatus(UserActivateStatus.ACTIVATE);//邮箱激活
 //        user.setLoginType(LoginTypeEnum.EMAIL);
@@ -86,19 +86,19 @@ public class UserServiceImpl {
     /**
      * 用户email登录
      *
-     * @param userEmailLoginVo
+     * @param userEmailLoginDto
      * @return
      */
-    public User emailLogin(UserEmailLoginVo userEmailLoginVo) {
+    public User emailLogin(UserEmailLoginDto userEmailLoginDto) {
         //根据email查找用户数据
-        User user = userDao.findByEmail(userEmailLoginVo.getEmail());
+        User user = userDao.findByEmail(userEmailLoginDto.getEmail());
 
         //用户不存在
         if (user == null) {
             throw new YFException(ReturnMessageEnum.ACCOUNT_NOT_EXIST);
         }
         //验证密码是否正确
-        if (!user.getPwd().equals(userEmailLoginVo.getPwd())) {
+        if (!user.getPwd().equals(userEmailLoginDto.getPwd())) {
             throw new YFException(ReturnMessageEnum.PASSWORD_ERROR);
         }
 
@@ -110,20 +110,20 @@ public class UserServiceImpl {
     /**
      * 第三方账户登录
      *
-     * @param userOpenIdLoginVo
+     * @param userOpenIdLoginDto
      * @return
      */
-    public User openLogin(UserOpenIdLoginVo userOpenIdLoginVo) {
+    public User openLogin(UserOpenIdLoginDto userOpenIdLoginDto) {
         //根据openId查找用户数据
-        User user = userDao.findByOpenId(userOpenIdLoginVo.getOpenId(), userOpenIdLoginVo.getOpenType());
+        User user = userDao.findByOpenId(userOpenIdLoginDto.getOpenId(), userOpenIdLoginDto.getOpenType());
 
         //用户不存在，则注册第三方账户
         if (user == null) {
-            if (userOpenIdLoginVo.getRegisterTimezone() == null) {
+            if (userOpenIdLoginDto.getRegisterTimezone() == null) {
                 throw new YFException(ReturnMessageEnum.REGISTER_TIMEZONE_NULL);
             }
             user = new User();
-            BeanUtils.copyProperties(userOpenIdLoginVo,user);
+            BeanUtils.copyProperties(userOpenIdLoginDto, user);
             user.setRegisterType(UserRegisterEnum.OPENID);
             user = register(user);
             return user;
@@ -131,7 +131,7 @@ public class UserServiceImpl {
 
         //用户存在则执行登录
         //验证密码是否正确
-        if (!user.getPwd().equals(userOpenIdLoginVo.getPwd())) {
+        if (!user.getPwd().equals(userOpenIdLoginDto.getPwd())) {
             throw new YFException(ReturnMessageEnum.PASSWORD_ERROR);
         }
         //执行登录保存
@@ -194,20 +194,20 @@ public class UserServiceImpl {
     /**
      * 重置密码
      *
-     * @param userPwdResetVo
+     * @param userPwdResetDto
      */
-    public void pwdreset(UserPwdResetVo userPwdResetVo) {
-        User user = userDao.findByEmail(userPwdResetVo.getEmail());
-        if(user == null ){
+    public void pwdreset(UserPwdResetDto userPwdResetDto) {
+        User user = userDao.findByEmail(userPwdResetDto.getEmail());
+        if (user == null) {
             throw new YFException(ReturnMessageEnum.ACCOUNT_IS_EXIST);
         }
 
         //比对旧密码
-        if (!userPwdResetVo.getPwd().equals(user.getPwd())) {
+        if (!userPwdResetDto.getPwd().equals(user.getPwd())) {
             throw new YFException(ReturnMessageEnum.PASSWORD_ERROR);
         }
         //修改密码
-        user.setPwd(userPwdResetVo.getNewPwd());
+        user.setPwd(userPwdResetDto.getNewPwd());
         userDao.pwdReset(user);
     }
 
@@ -232,5 +232,34 @@ public class UserServiceImpl {
         //token修改为空
         User user = userDao.findByAccessToken(accessToken);
         return user;
+    }
+
+    public User updateUserInfo(UserUpdateInfoDto userUpdateInfoDto) throws IOException {
+        //查询用户信息
+        User user = userDao.findByAccessToken(userUpdateInfoDto.getAccessToken());
+        if (user == null) {
+            throw new YFException(ReturnMessageEnum.TOKEN_INVALID);
+        }
+
+        //上传头像文件到oss
+        if (userUpdateInfoDto.getHeadPicFile() != null) {
+            String accessKeyId = YFResourceUtil.getValueByKey("resource.properties", "oss.accessKeyId");
+            String accessKeySecret = YFResourceUtil.getValueByKey("resource.properties", "oss.accessKeySecret");
+            String endpoint = YFResourceUtil.getValueByKey("resource.properties", "oss.endpoint");
+            String bucketName = YFResourceUtil.getValueByKey("resource.properties", "oss.bucketName");
+            String folderStr = YFResourceUtil.getValueByKey("resource.properties", "oss.headpic.folderStr");
+            String headPicUrl = YFOSSUtils.PutObject(accessKeyId, accessKeySecret, endpoint, userUpdateInfoDto.getHeadPicFile().getInputStream(), bucketName, folderStr, ".jpg",
+                    userUpdateInfoDto.getHeadPicFile().getInputStream().available());
+            user.setHeadPic(headPicUrl);
+        }
+
+        BeanUtils.copyProperties(userUpdateInfoDto,user);
+
+        userDao.updateUserInfo(user);
+        return user;
+    }
+
+    public void getBackPwd(UserForgetPwdDto userForgetPwdDto){
+
     }
 }

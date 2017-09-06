@@ -10,25 +10,21 @@ import com.yf.pet.common.utils.TokenUtils;
 import com.yf.pet.entity.ResponseVO;
 import com.yf.pet.common.ReturnMessageEnum;
 import com.yf.pet.entity.user.User;
-import com.yf.pet.entity.user.UserRegisterEnum;
-import com.yf.pet.entity.user.vo.UserEmailLoginVo;
-import com.yf.pet.entity.user.vo.UserOpenIdLoginVo;
-import com.yf.pet.entity.user.vo.UserPwdResetVo;
-import com.yf.pet.entity.user.vo.UserRegisterVo;
+import com.yf.pet.entity.user.dto.*;
 import com.yf.pet.exception.YFException;
 import com.yf.pet.service.impl.UserServiceImpl;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static com.yf.pet.common.utils.IPUtils.getRemoteHost;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * 用户管理控制层
@@ -48,8 +44,8 @@ public class UserController {
 
 
     @DisableAuth
-    @RequestMapping(value = "/",method = RequestMethod.GET)
-    public String hello(){
+    @RequestMapping(value = "/", method = RequestMethod.GET)
+    public String hello() {
         return "hello";
     }
 
@@ -62,30 +58,30 @@ public class UserController {
      */
     @DisableAuth
     @RequestMapping(value = "/register", consumes = "application/json", produces = "application/json")
-    public ResponseVO register(@RequestBody UserRegisterVo userRegisterVo, HttpServletRequest request) throws Exception {
+    public ResponseVO register(@RequestBody UserRegisterDto userRegisterDto, HttpServletRequest request) throws Exception {
         // 检查参数
-        if (userRegisterVo == null) {
+        if (userRegisterDto == null) {
             throw new YFException(ReturnMessageEnum.PARAMETER_ERROR);
         }
-        if (userRegisterVo.getPwd() == null) {
+        if (userRegisterDto.getPwd() == null) {
             throw new YFException(ReturnMessageEnum.PASSWORD_NULL);
         }
-        if (StringUtils.isEmpty(userRegisterVo.getEmail())) {
+        if (StringUtils.isEmpty(userRegisterDto.getEmail())) {
             throw new YFException(ReturnMessageEnum.EMAIL_NULL);
         }
-        if (userRegisterVo.getRegisterTimezone() == null) {
+        if (userRegisterDto.getRegisterTimezone() == null) {
             throw new YFException(ReturnMessageEnum.REGISTER_TIMEZONE_NULL);
         }
         //TODO 密码和邮箱格式验证
 
         //验证账号是否已经存在
-        Boolean isExist = userService.findAccountIsExist(userRegisterVo.getEmail(), null);
+        Boolean isExist = userService.findAccountIsExist(userRegisterDto.getEmail(), null);
         if (isExist) {
             throw new YFException(ReturnMessageEnum.ACCOUNT_IS_EXIST);
         }
 
         //注册
-        User user = userService.emailRegister(userRegisterVo);
+        User user = userService.emailRegister(userRegisterDto);
 
         ResponseVO responseVO = new ResponseVO(ReturnMessageEnum.RETURN_OK);
         responseVO.setData(user);
@@ -101,20 +97,20 @@ public class UserController {
      */
     @DisableAuth
     @RequestMapping(value = "/login", consumes = "application/json", produces = "application/json")
-    public ResponseVO login(@RequestBody UserEmailLoginVo userEmailLoginVo, HttpServletRequest request) throws Exception {
+    public ResponseVO login(@RequestBody UserEmailLoginDto userEmailLoginDto, HttpServletRequest request) throws Exception {
         // 检查参数
-        if (userEmailLoginVo == null) {
+        if (userEmailLoginDto == null) {
             throw new YFException(ReturnMessageEnum.PARAMETER_ERROR);
         }
-        if (userEmailLoginVo.getEmail() == null) {
+        if (userEmailLoginDto.getEmail() == null) {
             throw new YFException(ReturnMessageEnum.EMAIL_NULL);
         }
-        if (userEmailLoginVo.getPwd() == null) {
+        if (userEmailLoginDto.getPwd() == null) {
             throw new YFException(ReturnMessageEnum.PASSWORD_NULL);
         }
 
         //登录
-        User user = userService.emailLogin(userEmailLoginVo);
+        User user = userService.emailLogin(userEmailLoginDto);
 
         ResponseVO responseVO = new ResponseVO(ReturnMessageEnum.RETURN_OK);
         responseVO.setData(user);
@@ -130,28 +126,28 @@ public class UserController {
      */
     @DisableAuth
     @RequestMapping(value = "/openlogin", consumes = "application/json", produces = "application/json")
-    public ResponseVO openAccountlogin(@RequestBody UserOpenIdLoginVo userOpenIdLoginVo, HttpServletRequest request) throws Exception {
+    public ResponseVO openAccountlogin(@RequestBody UserOpenIdLoginDto userOpenIdLoginDto, HttpServletRequest request) throws Exception {
 
-        log.info("第三方用户登录："+ this.getClass().getName() + ".openAccountlogin" );
+        log.info("第三方用户登录：" + this.getClass().getName() + ".openAccountlogin");
         // 检查参数
-        if (userOpenIdLoginVo == null) {
+        if (userOpenIdLoginDto == null) {
             throw new YFException(ReturnMessageEnum.PARAMETER_ERROR);
         }
-        if (userOpenIdLoginVo.getOpenId() == null) {
+        if (userOpenIdLoginDto.getOpenId() == null) {
             throw new YFException(ReturnMessageEnum.OPEN_ID_NULL);
         }
-        if (userOpenIdLoginVo.getOpenType() == null) {
+        if (userOpenIdLoginDto.getOpenType() == null) {
             throw new YFException(ReturnMessageEnum.OPEN_TYPE_NULL);
         }
-        if (userOpenIdLoginVo.getPwd() == null) {
+        if (userOpenIdLoginDto.getPwd() == null) {
             throw new YFException(ReturnMessageEnum.PASSWORD_NULL);
         }
 
         // 获取用户IP地址
-//        userOpenIdLoginVo.setIpAddress(getRemoteHost(request));
+//        userOpenIdLoginDto.setIpAddress(getRemoteHost(request));
 
         //登录
-        User user = userService.openLogin(userOpenIdLoginVo);
+        User user = userService.openLogin(userOpenIdLoginDto);
 
         ResponseVO responseVO = new ResponseVO(ReturnMessageEnum.RETURN_OK);
         responseVO.setData(user);
@@ -167,18 +163,18 @@ public class UserController {
      * @throws Exception 异常抛出
      */
     @RequestMapping(value = "/pwdreset", consumes = "application/json", produces = "application/json")
-    public ResponseVO updatePassword(@RequestBody UserPwdResetVo userPwdResetVo, HttpServletRequest request) throws Exception {
+    public ResponseVO updatePassword(@RequestBody UserPwdResetDto userPwdResetDto, HttpServletRequest request) throws Exception {
         // 检查参数
-        if (userPwdResetVo == null) {
+        if (userPwdResetDto == null) {
             throw new YFException(ReturnMessageEnum.PARAMETER_ERROR);
         }
-        if (StringUtils.isEmpty(userPwdResetVo.getPwd()) || StringUtils.isEmpty(userPwdResetVo.getNewPwd())) {
+        if (StringUtils.isEmpty(userPwdResetDto.getPwd()) || StringUtils.isEmpty(userPwdResetDto.getNewPwd())) {
             throw new YFException(ReturnMessageEnum.PASSWORD_NULL);
         }
-        if (StringUtils.isEmpty(userPwdResetVo.getEmail())) {
+        if (StringUtils.isEmpty(userPwdResetDto.getEmail())) {
             throw new YFException(ReturnMessageEnum.EMAIL_NULL);
         }
-        userService.pwdreset(userPwdResetVo);
+        userService.pwdreset(userPwdResetDto);
         ResponseVO responseVO = new ResponseVO(ReturnMessageEnum.RETURN_OK);
         return responseVO;
     }
@@ -190,9 +186,12 @@ public class UserController {
      * @return
      * @throws Exception 异常抛出
      */
-    @RequestMapping(value = "/forgetpwd", consumes = "application/json", produces = "application/json")
-    public ResponseVO getbackpwd(@RequestBody UserOpenIdLoginVo userOpenIdLoginVo, HttpServletRequest request) throws Exception {
-        //TODO
+    @RequestMapping(value = "/password/reset", consumes = "application/json", produces = "application/json")
+    public ResponseVO getbackpwd(@RequestBody UserForgetPwdDto userForgetPwdDto, HttpServletRequest request) throws Exception {
+        if(userForgetPwdDto == null || StringUtils.isEmpty(userForgetPwdDto.getEmail()) ){
+            throw new YFException(ReturnMessageEnum.PASSWORD_NULL);
+        }
+
 
 
         ResponseVO responseVO = new ResponseVO(ReturnMessageEnum.RETURN_OK);
@@ -206,11 +205,42 @@ public class UserController {
      * @return
      * @throws Exception 异常抛出
      */
-    @RequestMapping(value = "/updateuserinfo", consumes = "application/json", produces = "application/json")
-    public ResponseVO updateUserinfo(@RequestBody UserOpenIdLoginVo userOpenIdLoginVo, HttpServletRequest request) throws Exception {
-        //TODO
-        
+    @RequestMapping(value = "/updateuserinfo")
+    public ResponseVO updateUserinfo(@RequestParam(value = "file", required = false) MultipartFile file, HttpServletRequest request) throws Exception {
+        String accessToken = TokenUtils.getAuthToken(request);
+        if (StringUtils.isEmpty(accessToken)){
+            throw  new YFException(ReturnMessageEnum.TOKEN_NULL);
+        }
+
+        //接收参数
+        UserUpdateInfoDto userUpdateInfoDto = new UserUpdateInfoDto();
+        MultipartFile headPic = file;
+        userUpdateInfoDto.setHeadPicFile(headPic);
+
+        userUpdateInfoDto.setAccessToken(accessToken);
+        userUpdateInfoDto.setFirstName(StringUtils.isEmpty(request.getParameter("firstName")) ? null : request.getParameter("firstName"));
+        userUpdateInfoDto.setLastName(StringUtils.isEmpty(request.getParameter("lastName")) ? null : request.getParameter("lastName"));
+        userUpdateInfoDto.setMobile(StringUtils.isEmpty(request.getParameter("mobile")) ? null : request.getParameter("mobile"));
+
+        Integer gender = null;
+        Object sexObj = request.getParameter("gender");
+        if (sexObj != null && !StringUtils.isEmpty(sexObj.toString())) {
+            gender = NumberUtils.toInt(sexObj.toString());
+        }
+        userUpdateInfoDto.setGender(gender);
+
+        Date birthday = null;
+        Object birthdayObj = request.getParameter("birthday");
+        if (birthdayObj != null && !StringUtils.isEmpty(birthdayObj.toString())) {
+            birthday = new SimpleDateFormat("yyyy-MM-dd").parse(birthdayObj.toString());
+        }
+        userUpdateInfoDto.setBirthday(birthday);
+
+        //调用接口
+        User user = userService.updateUserInfo(userUpdateInfoDto);
+
         ResponseVO responseVO = new ResponseVO(ReturnMessageEnum.RETURN_OK);
+        responseVO.setData(user);
         return responseVO;
     }
 
@@ -222,13 +252,13 @@ public class UserController {
      * @throws Exception 异常抛出
      */
     @RequestMapping(value = "/getuserinfo", consumes = "application/json", produces = "application/json")
-    public ResponseVO getUserinfo( HttpServletRequest request) throws Exception {
+    public ResponseVO getUserinfo(HttpServletRequest request) throws Exception {
         String accessToken = TokenUtils.getAuthToken(request);
-        if(StringUtils.isEmpty(accessToken)){
+        if (StringUtils.isEmpty(accessToken)) {
             throw new YFException(ReturnMessageEnum.TOKEN_NULL);
         }
 
-        User user =userService.getUserInfo(accessToken);
+        User user = userService.getUserInfo(accessToken);
         ResponseVO responseVO = new ResponseVO(ReturnMessageEnum.RETURN_OK);
         responseVO.setData(user);
         return responseVO;
@@ -241,10 +271,10 @@ public class UserController {
      * @return
      * @throws Exception 异常抛出
      */
-    @RequestMapping(value = "/loginout", consumes = "application/json", produces = "application/json")
+    @RequestMapping(value = "/loginout")
     public ResponseVO logout(HttpServletRequest request) throws Exception {
         String accessToken = TokenUtils.getAuthToken(request);
-        if(StringUtils.isEmpty(accessToken)){
+        if (StringUtils.isEmpty(accessToken)) {
             throw new YFException(ReturnMessageEnum.TOKEN_NULL);
         }
         //登出
@@ -263,20 +293,20 @@ public class UserController {
      */
     @DisableAuth
     @RequestMapping(value = "/checkemail", consumes = "application/json", produces = "application/json")
-    public ResponseVO checkEmail(@RequestBody UserEmailLoginVo userEmailLoginVo, HttpServletRequest request) throws Exception {
+    public ResponseVO checkEmail(@RequestBody UserEmailLoginDto userEmailLoginDto, HttpServletRequest request) throws Exception {
         // 检查参数
-        if (userEmailLoginVo == null) {
+        if (userEmailLoginDto == null) {
             throw new YFException(ReturnMessageEnum.PARAMETER_ERROR);
         }
-        if (StringUtils.isEmpty(userEmailLoginVo.getEmail())) {
+        if (StringUtils.isEmpty(userEmailLoginDto.getEmail())) {
             throw new YFException(ReturnMessageEnum.EMAIL_NULL);
         }
-        Boolean isExist = userService.findAccountIsExist(userEmailLoginVo.getEmail(), null);
-        if(isExist){
+        Boolean isExist = userService.findAccountIsExist(userEmailLoginDto.getEmail(), null);
+        if (isExist) {
             ResponseVO responseVO = new ResponseVO(ReturnMessageEnum.ACCOUNT_IS_EXIST);
             return responseVO;
         }
-        
+
         ResponseVO responseVO = new ResponseVO(ReturnMessageEnum.RETURN_OK);
         return responseVO;
     }
@@ -290,12 +320,12 @@ public class UserController {
      */
 //    @DisableAuth
 //    @RequestMapping(value = "/sendcodetoemail", consumes = "application/json", produces = "application/json")
-//    public ResponseVO sendCodeToEmail(@RequestBody UserEmailLoginVo  userEmailLoginVo, HttpServletRequest request) throws Exception {
+//    public ResponseVO sendCodeToEmail(@RequestBody UserEmailLoginDto  userEmailLoginDto, HttpServletRequest request) throws Exception {
 //        // 检查参数
-//        if (userEmailLoginVo == null) {
+//        if (userEmailLoginDto == null) {
 //            throw new YFException(ReturnMessageEnum.PARAMETER_ERROR);
 //        }
-//        if (StringUtils.isEmpty(userEmailLoginVo.getEmail())) {
+//        if (StringUtils.isEmpty(userEmailLoginDto.getEmail())) {
 //            throw new YFException(ReturnMessageEnum.EMAIL_NULL);
 //        }
 //        //给指定邮箱发个验证码

@@ -113,4 +113,17 @@
         WHERE
         access_token = #{accessToken}
     </update>
+    
+    <update id="updateUserInfo">
+        UPDATE user
+        SET mobile = #{mobile},
+            first_name = #{firstName},
+            last_name = #{lastName},
+            head_pic = #{headPic},
+            birthday = #{birthday},
+            gender = #{gender},
+            update_date = now()
+        WHERE
+            user_id = #{userId}
+    </update>
 </mapper>

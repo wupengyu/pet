@@ -1,8 +1,6 @@
-package com.yf.pet.entity.user.vo;
+package com.yf.pet.entity.user.dto;
 
 import lombok.Data;
-
-import java.util.Date;
 
 /**
  * <p>Description:</p>
@@ -13,7 +11,7 @@ import java.util.Date;
  * @date 2017/9/1
  */
 @Data
-public class UserRegisterVo {
+public class UserRegisterDto {
     private String email;
 //    private String openId;//第三方账户ID
 //    private Integer openType;//第三方账户类型

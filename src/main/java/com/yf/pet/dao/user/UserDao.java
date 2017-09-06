@@ -79,4 +79,11 @@ public interface UserDao {
      * 登出
      */
     void updateTokenIsNull(@Param("accessToken")String accessToken);
+
+    /**
+     * 更新用户信息
+     *
+     * @param user
+     */
+    void updateUserInfo(User user);
 }

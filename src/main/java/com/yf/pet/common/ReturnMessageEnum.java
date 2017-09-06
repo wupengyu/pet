@@ -52,6 +52,11 @@ public enum ReturnMessageEnum {
      */
     PARAMETER_ERROR(ModuleTypeEnum.SYSTEM,"003","parameter error"),
 
+    /**
+     * 参数为空
+     */
+    PARAMETER_NULL(ModuleTypeEnum.SYSTEM,"004","parameter null"),
+
 
     //------------------------------------------------账户模块----------------------------------------------------------//
 
