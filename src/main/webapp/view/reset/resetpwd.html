@@ -7,14 +7,14 @@
 <link rel="stylesheet" href="../../accset/biz/style.css">
 <head>
     <meta charset="UTF-8">
-    <title>Verify Email</title>
+    <title>Reset Password</title>
 </head>
 <body>
 <div class="wrap">
     <div class="main">
 
-        <div class="logo"><img src="../../accset/image/logo.png"></div>
-        <div class="bar"><img src="../../accset/image/bar.png"></div>
+        <!--<div class="logo"><img src="../../accset/image/logo.png"></div>-->
+        <!--<div class="bar"><img src="../../accset/image/bar.png"></div>-->
         <h1 class="change">Change Password</h1>
 
         <div class="fm">
@@ -77,9 +77,9 @@
             // 4. submit
             $.ajax({
                 type: "POST",
-                url: "/coros/account/password/reset.do",
+                url: "/pet/user/pwd/update.do",
                 contentType: 'application/json',//传递参数类型
-                data: JSON.stringify({account: email, pwd: pwd, checkCode: checkCode, accountType: 2}),
+                data: JSON.stringify({email: email, pwd: pwd, code: checkCode}),
                 dataType: "json",// parameter
                 success: function (data) {
                     if (data && data.result === "0000") {

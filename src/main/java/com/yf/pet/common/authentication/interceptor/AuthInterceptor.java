@@ -8,7 +8,7 @@ import com.yf.pet.common.authentication.annotation.DisableAuth;
 import com.yf.pet.common.cache.RedisUtilsPet;
 import com.yf.pet.common.ReturnMessageEnum;
 import com.yf.pet.entity.user.User;
-import com.yf.pet.exception.YFException;
+import com.yf.pet.common.exception.YFException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

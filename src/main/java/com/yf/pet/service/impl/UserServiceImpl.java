@@ -1,18 +1,24 @@
 package com.yf.pet.service.impl;
 
+import com.google.gson.Gson;
 import com.yf.pet.common.ReturnMessageEnum;
+import com.yf.pet.common.cache.ProductModel;
+import com.yf.pet.common.cache.ProductType;
 import com.yf.pet.common.cache.RedisUtilsPet;
+import com.yf.pet.common.cache.SessionCacheWrapper;
 import com.yf.pet.common.utils.YFOSSUtils;
 import com.yf.pet.common.utils.YFResourceUtil;
 import com.yf.pet.common.utils.primary.YFPrimaryKeyUtils;
 import com.yf.pet.dao.user.UserDao;
 import com.yf.pet.common.enums.ServiceModeType;
+import com.yf.pet.entity.checkcode.CheckCode;
+import com.yf.pet.entity.checkcode.enums.CheckCodeEnums;
 import com.yf.pet.entity.user.User;
 import com.yf.pet.common.ApplicationConstants;
 import com.yf.pet.common.utils.CodeGenerator;
 import com.yf.pet.entity.user.UserRegisterEnum;
 import com.yf.pet.entity.user.dto.*;
-import com.yf.pet.exception.YFException;
+import com.yf.pet.common.exception.YFException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.BeanUtils;
@@ -24,6 +30,7 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>Description: user</p>
@@ -39,6 +46,13 @@ public class UserServiceImpl {
 
     @Autowired
     private UserDao userDao;
+
+
+//    @Autowired
+//    private StringRedisTemplate redisTemplate;
+
+    @Autowired
+    private PetEmailService petEmailService;
 
     /**
      * 邮箱用户注册
@@ -119,21 +133,34 @@ public class UserServiceImpl {
 
         //用户不存在，则注册第三方账户
         if (user == null) {
-            if (userOpenIdLoginDto.getRegisterTimezone() == null) {
-                throw new YFException(ReturnMessageEnum.REGISTER_TIMEZONE_NULL);
+            //如果邮箱已存在，则直接合并账号
+            Boolean marge = false;
+            if (!StringUtils.isEmpty(userOpenIdLoginDto.getEmail())) {
+                user = userDao.findByEmail(userOpenIdLoginDto.getEmail());
+                if (user != null) {
+                    //如果邮箱已存在，则直接合并账号,更新资料，以facebook的为主
+                    marge = true;
+                }
             }
-            user = new User();
-            BeanUtils.copyProperties(userOpenIdLoginDto, user);
-            user.setRegisterType(UserRegisterEnum.OPENID);
-            user = register(user);
+
+            if (marge) {
+                BeanUtils.copyProperties(userOpenIdLoginDto, user);
+                userDao.updateUserInfo(user);
+            } else {
+                //不存在则执行注册流程
+                if (userOpenIdLoginDto.getRegisterTimezone() == null) {
+                    throw new YFException(ReturnMessageEnum.REGISTER_TIMEZONE_NULL);
+                }
+
+                user = new User();
+                BeanUtils.copyProperties(userOpenIdLoginDto, user);
+                user.setRegisterType(UserRegisterEnum.OPENID);
+                user = register(user);
+            }
             return user;
         }
 
         //用户存在则执行登录
-        //验证密码是否正确
-        if (!user.getPwd().equals(userOpenIdLoginDto.getPwd())) {
-            throw new YFException(ReturnMessageEnum.PASSWORD_ERROR);
-        }
         //执行登录保存
         user = loginSave(user);
         return user;
@@ -212,6 +239,41 @@ public class UserServiceImpl {
     }
 
     /**
+     * 根据验证码修改密码
+     *
+     * @param userPwdResetDto
+     */
+    public void resetPwdByCode(UserPwdResetDto userPwdResetDto) {
+        User user = userDao.findByEmail(userPwdResetDto.getEmail());
+        if (user == null) {
+            throw new YFException(ReturnMessageEnum.ACCOUNT_IS_EXIST);
+        }
+
+        //比对验证码
+        String key = ProductType.PET + ":" + ProductModel.EMAIL_CODE + ":" + userPwdResetDto.getEmail();
+        String code = (String) SessionCacheWrapper.getRedisTemplate().opsForValue().get(key);
+        if (StringUtils.isEmpty(code) || StringUtils.isEmpty(userPwdResetDto.getCode())) {
+            throw new YFException(ReturnMessageEnum.CODE_ERROR);
+        }
+        Gson gson = new Gson();
+        CheckCode checkCode = gson.fromJson(code, CheckCode.class);
+        if (checkCode == null || StringUtils.isEmpty(checkCode.getCheckCode()) || !checkCode.getCheckCode().equals(userPwdResetDto.getCode())) {
+            throw new YFException(ReturnMessageEnum.CODE_ERROR);
+        }
+        //有效次数为一次，一次验证通过就失效
+        SessionCacheWrapper.getRedisTemplate().delete(key);
+
+        //修改密码
+        user.setPwd(userPwdResetDto.getPwd());
+        userDao.pwdReset(user);
+    }
+
+
+//    public static void main(String[] args) {
+//        System.out.println(YFMD5.getMD5("abcdef"));
+//    }
+
+    /**
      * 登出
      *
      * @param accessToken
@@ -234,13 +296,19 @@ public class UserServiceImpl {
         return user;
     }
 
+    /**
+     * 修改用户信息
+     *
+     * @param userUpdateInfoDto
+     * @return
+     * @throws IOException
+     */
     public User updateUserInfo(UserUpdateInfoDto userUpdateInfoDto) throws IOException {
         //查询用户信息
         User user = userDao.findByAccessToken(userUpdateInfoDto.getAccessToken());
         if (user == null) {
             throw new YFException(ReturnMessageEnum.TOKEN_INVALID);
         }
-
         //上传头像文件到oss
         if (userUpdateInfoDto.getHeadPicFile() != null) {
             String accessKeyId = YFResourceUtil.getValueByKey("resource.properties", "oss.accessKeyId");
@@ -253,13 +321,33 @@ public class UserServiceImpl {
             user.setHeadPic(headPicUrl);
         }
 
-        BeanUtils.copyProperties(userUpdateInfoDto,user);
+        BeanUtils.copyProperties(userUpdateInfoDto, user);
 
         userDao.updateUserInfo(user);
         return user;
     }
 
-    public void getBackPwd(UserForgetPwdDto userForgetPwdDto){
+    /**
+     * 发送邮件重置密码
+     *
+     * @param email
+     */
+    public void sendEmailResetPwd(String email) {
+        //先验证邮箱是否已注册
+        User user = userDao.findByEmail(email);
+        if (user == null) {
+            throw new YFException(ReturnMessageEnum.ACCOUNT_NOT_EXIST);
+        }
 
+        //生成邮件重置密码的验证码，有效时间15分钟，15分钟过后验证码失效;验证码放入redis缓存
+        String code = CodeGenerator.getCodeString(ApplicationConstants.EMAIL_CODE);
+        CheckCode checkCode = new CheckCode(code, new Date(), CheckCodeEnums.EAMIL, user.getEmail());
+        Gson gson = new Gson();
+        String value = gson.toJson(checkCode);
+        String key = ProductType.PET + ":" + ProductModel.EMAIL_CODE + ":" + user.getEmail();
+        SessionCacheWrapper.getRedisTemplate().opsForValue().set(key, value, 1, TimeUnit.HOURS);
+
+        //发送邮件
+        petEmailService.sendMail(user.getEmail(), "yftech", petEmailService.createResetPwdHtml(user.getEmail(), code));
     }
 }

@@ -7,6 +7,7 @@ package com.yf.pet.common.utils;
 import com.alibaba.fastjson.JSON;
 import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.model.*;
+import com.yf.pet.common.ApplicationConstants;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -27,7 +28,7 @@ public class AliyunOssUtils {
     private static Logger logger = LoggerFactory.getLogger(AliyunOssUtils.class);
     private OSSClient ossClient = null;
     // 配置文件路径
-    public static final String CINFIG_PATH = CommonConstants.CONFIG_PATH;
+    public static final String CINFIG_PATH = ApplicationConstants.CONFIG_PATH;
     public static final String ENDPOINT = YFResourceUtil.getValueByKey(CINFIG_PATH, "oss.endpoint");
     private static final String INTERNAL_ENDPOINT = YFResourceUtil.getValueByKey(CINFIG_PATH, "oss.internal.endpoint");
     public static final String ACCESSKEYID = YFResourceUtil.getValueByKey(CINFIG_PATH, "oss.accessKeyId");

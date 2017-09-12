@@ -137,4 +137,10 @@ public class YFRegextUtils {
         }
     }
 
+    public static boolean isEmail(String email) {
+        //正则表达式
+        String regex = "^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$";
+        return email.matches(regex);
+    }
+
 }

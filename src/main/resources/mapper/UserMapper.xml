@@ -113,7 +113,8 @@
         WHERE
         access_token = #{accessToken}
     </update>
-    
+
+    <!-- 修改用户信息 -->
     <update id="updateUserInfo">
         UPDATE user
         SET mobile = #{mobile},
@@ -125,5 +126,21 @@
             update_date = now()
         WHERE
             user_id = #{userId}
+    </update>
+
+    <!-- 合并用户信息 -->
+    <update id="mergeUserInfo">
+        UPDATE user
+        SET mobile = #{mobile},
+        first_name = #{firstName},
+        last_name = #{lastName},
+        head_pic = #{headPic},
+        birthday = #{birthday},
+        gender = #{gender},
+        update_date = now(),
+        open_type = #{openType},
+        open_id = #{openId}
+        WHERE
+        user_id = #{userId}
     </update>
 </mapper>

@@ -2,7 +2,7 @@ package com.yf.pet.common.authentication.interceptor;
 
 import com.alibaba.fastjson.JSON;
 import com.yf.pet.common.ReturnMessageEnum;
-import com.yf.pet.exception.YFException;
+import com.yf.pet.common.exception.YFException;
 import org.apache.commons.collections.map.HashedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

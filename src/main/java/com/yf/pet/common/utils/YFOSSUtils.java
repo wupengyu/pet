@@ -9,7 +9,7 @@ import com.aliyun.openservices.oss.OSSClient;
 import com.aliyun.openservices.oss.model.OSSObject;
 import com.aliyun.openservices.oss.model.ObjectMetadata;
 import com.yf.pet.common.ReturnMessageEnum;
-import com.yf.pet.exception.YFException;
+import com.yf.pet.common.exception.YFException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 

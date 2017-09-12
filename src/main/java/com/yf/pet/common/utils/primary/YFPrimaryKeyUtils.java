@@ -1,7 +1,7 @@
 package com.yf.pet.common.utils.primary;
 
 import com.yf.pet.common.ReturnMessageEnum;
-import com.yf.pet.exception.YFException;
+import com.yf.pet.common.exception.YFException;
 import com.yf.pet.common.utils.YFResourceUtil;
 import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;

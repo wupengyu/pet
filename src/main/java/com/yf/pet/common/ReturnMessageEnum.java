@@ -107,6 +107,16 @@ public enum ReturnMessageEnum {
      */
     OPEN_TYPE_NULL(ModuleTypeEnum.ACCOUNT, "010", "open account type can not be null"),
 
+    /**
+     * email格式不对
+     */
+    EMAIL_ERROR(ModuleTypeEnum.ACCOUNT, "011", "email format is wrong"),
+
+    /**
+     * 验证码不对或者过期
+     */
+    CODE_ERROR(ModuleTypeEnum.ACCOUNT, "012", "Validation code expired or error"),
+
 //    /**
 //     * 只用一种帐号类型存在,不能解除绑定
 //     */

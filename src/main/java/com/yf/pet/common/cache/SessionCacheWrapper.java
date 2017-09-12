@@ -9,7 +9,6 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.cache.Cache.ValueWrapper;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +36,11 @@ public class SessionCacheWrapper {
     private static Long expiredTimeAdmin;
 
     /**
+     * 邮箱找回密码的验证码 过期时间
+     */
+    private static Long getExpiredTimeEmailCode;
+
+    /**
      * 设置CacheManager，通过Spring注入.
      *
      * @param sessionCacheManager 专用于Session的CacheManager.
@@ -52,6 +56,10 @@ public class SessionCacheWrapper {
      */
     public static final void setRedisTemplate(RedisTemplate<String, Object> redisTemplate) {
         SessionCacheWrapper.redisTemplate = redisTemplate;
+    }
+
+    public static RedisTemplate<String, Object> getRedisTemplate() {
+        return redisTemplate;
     }
 
     /**

@@ -29,7 +29,12 @@ public enum ProductModel {
     /**
      * 同步状态
      */
-    SYNC("sync");
+    SYNC("sync"),
+
+    /**
+     * email找回密码验证码
+     */
+    EMAIL_CODE("code:email");
 
     private final String productModel;
 

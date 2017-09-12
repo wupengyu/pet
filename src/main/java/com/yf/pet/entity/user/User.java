@@ -1,6 +1,8 @@
 package com.yf.pet.entity.user;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
@@ -9,6 +11,8 @@ import java.util.Date;
  *  wupengyu
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
 
     private long userId;

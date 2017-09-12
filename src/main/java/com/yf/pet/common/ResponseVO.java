@@ -2,7 +2,7 @@
  * Copyright (c) 2014-2018 Chenlaisoft Co.Ltd. All rights reserved.
  */
 
-package com.yf.pet.entity;
+package com.yf.pet.common;
 
 import com.yf.pet.common.ReturnMessageEnum;
 

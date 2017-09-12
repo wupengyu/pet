@@ -4,6 +4,8 @@
 
 package com.yf.pet.common.utils;
 
+import com.yf.pet.common.ApplicationConstants;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -72,7 +74,7 @@ public enum YFEnumFileKey {
 
 
     // 配置文件路径
-    private static final String CINFIG_PATH = CommonConstants.CONFIG_PATH;
+    private static final String CINFIG_PATH = ApplicationConstants.CONFIG_PATH;
 
 
     // 成员变量

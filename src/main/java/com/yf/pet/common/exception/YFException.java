@@ -1,4 +1,4 @@
-package com.yf.pet.exception;
+package com.yf.pet.common.exception;
 
 
 import com.yf.pet.common.ReturnMessageEnum;

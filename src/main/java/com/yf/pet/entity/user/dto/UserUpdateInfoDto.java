@@ -1,6 +1,8 @@
 package com.yf.pet.entity.user.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
@@ -14,6 +16,8 @@ import java.util.Date;
  * @date 2017/9/6
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserUpdateInfoDto {
     private String mobile;
     private String accessToken;//登陆成功，返回访问的令牌

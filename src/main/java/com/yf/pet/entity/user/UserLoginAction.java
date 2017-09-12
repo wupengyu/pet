@@ -1,5 +1,9 @@
 package com.yf.pet.entity.user;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.Date;
 
 /**
@@ -10,6 +14,9 @@ import java.util.Date;
  * @author wupengyu
  * @date 2017/9/5
  */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserLoginAction {
     private String id;
     private String userId;

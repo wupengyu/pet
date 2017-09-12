@@ -1,7 +1,7 @@
 package com.yf.pet.common.utils.aes;
 
 import com.yf.pet.common.ReturnMessageEnum;
-import com.yf.pet.exception.YFException;
+import com.yf.pet.common.exception.YFException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;

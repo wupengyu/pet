@@ -1,6 +1,8 @@
 package com.yf.pet.entity.user.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * <p>Description:</p>
@@ -11,6 +13,8 @@ import lombok.Data;
  * @date 2017/9/1
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserEmailLoginDto {
 
     private String email;
