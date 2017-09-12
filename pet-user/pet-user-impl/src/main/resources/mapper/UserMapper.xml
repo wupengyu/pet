@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 账户信息mapper -->
+<mapper namespace="com.yf.pet.user.dao.UserDao">
+    <!-- 用户账户map对象 -->
+    <resultMap id="UserAccountMap" type="com.yf.pet.user.entity.User">
+        <result column="user_id" property="userId"/>
+        <result column="mobile" property="mobile"/>
+        <result column="email" property="email"/>
+        <result column="open_id" property="openId"/>
+        <result column="open_type" property="openType"/>
+        <!--<result column="open_name" property="openName"/>-->
+        <result column="pwd" property="pwd"/>
+        <result column="access_token" property="accessToken"/>
+        <result column="validity_date" property="validityDate"/>
+        <result column="register_type" property="registerType"/>
+        <!--<result column="client_type" property="clientType"/>-->
+        <!--<result column="login_type" property="loginType"/>-->
+        <!--<result column="ip_address" property="ipAddress"/>-->
+        <!--<result column="phone_id" property="phoneId"/>-->
+        <result column="create_date" property="createDate"/>
+        <result column="update_date" property="updateDate"/>
+        <!--<result column="activate_status" property="activateStatus"/>-->
+        <result column="first_name" property="firstName"/>
+        <result column="last_name" property="lastName"/>
+        <result column="gender" property="gender"/>
+        <result column="head_pic" property="headPic"/>
+        <result column="register_timezone" property="registerTimezone"/>
+    </resultMap>
+
+    <!-- 新增用户账户信息 -->
+    <insert id="addUser" >
+        INSERT INTO
+        user (user_id,email,open_id,open_type,pwd,access_token,validity_date,
+        register_type,create_date,register_timezone,head_pic,gender,first_name,last_name,mobile)
+        VALUES(#{userId},#{email},#{openId},#{openType},#{pwd},#{accessToken},
+        #{validityDate},#{registerType},#{createDate},#{registerTimezone},#{headPic},#{gender},
+        #{firstName},#{lastName},#{mobile})
+	</insert>
+
+    <!--查看帐号是否已经被注册-->
+    <select id="findAccountIsExist" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM user
+        <where>
+            <if test="email != null and email !='' ">
+                OR email = #{email}
+            </if>
+            <if test="openId != null and openId !='' ">
+                OR open_id = #{openId}
+            </if>
+        </where>
+    </select>
+
+    <!--验证accessToken是否有效-->
+    <select id="findAccessTokenIsValid" resultMap="UserAccountMap">
+        SELECT user_id,access_token,validity_date FROM user
+        WHERE access_token = #{accessToken}
+    </select>
+
+    <!--根据accessToken查找用户-->
+    <select id="findByAccessToken" resultMap="UserAccountMap">
+        SELECT * FROM user
+        WHERE access_token = #{accessToken}
+    </select>
+
+    <!--根据email查找用户-->
+    <select id="findByEmail" resultMap="UserAccountMap">
+        SELECT * FROM user
+        WHERE email = #{email}
+    </select>
+
+    <!--根据第三方账户查找用户-->
+    <select id="findByOpenId" resultMap="UserAccountMap">
+        SELECT * FROM user
+        WHERE open_id = #{openId}
+        AND open_type = #{openType}
+    </select>
+
+
+    <!--更新用户登录信息-->
+    <update id="updateUserLoginInfo" parameterType="com.yf.pet.entity.user.User">
+        update user set
+        access_token = #{accessToken},
+        validity_date = #{validityDate},
+        update_date = #{updateDate}
+        <where>
+            <choose>
+                <when test="email != null and email !=''">
+                    email = #{email}
+                </when >
+                <when test="openId != null and openId !=''">
+                    open_id = #{openId}
+                </when >
+                <otherwise>
+                    0 = 1
+                </otherwise>
+            </choose>
+        </where>
+    </update>
+
+    <!--重置密码-->
+    <update id="pwdReset" parameterType="com.yf.pet.entity.user.User">
+        update user set
+        pwd = #{pwd}
+        where email = #{email}
+    </update>
+
+    <!-- 登出，把accessToken修改成空 -->
+    <update id="updateTokenIsNull">
+        UPDATE user
+        SET access_token = NULL,
+            validity_date = NULL
+        WHERE
+        access_token = #{accessToken}
+    </update>
+
+    <!-- 修改用户信息 -->
+    <update id="updateUserInfo">
+        UPDATE user
+        SET mobile = #{mobile},
+            first_name = #{firstName},
+            last_name = #{lastName},
+            head_pic = #{headPic},
+            gender = #{gender},
+            update_date = now()
+        WHERE
+            user_id = #{userId}
+    </update>
+
+    <!-- 合并用户信息 -->
+    <update id="mergeUserInfo">
+        UPDATE user
+        SET mobile = #{mobile},
+        first_name = #{firstName},
+        last_name = #{lastName},
+        head_pic = #{headPic},
+        gender = #{gender},
+        update_date = now(),
+        open_type = #{openType},
+        open_id = #{openId}
+        WHERE
+        user_id = #{userId}
+    </update>
+</mapper>
