@@ -13,13 +13,13 @@ import com.yf.pet.common.utils.CodeGenerator;
 import com.yf.pet.common.utils.YFOSSUtils;
 import com.yf.pet.common.utils.YFResourceUtil;
 import com.yf.pet.common.utils.primary.YFPrimaryKeyUtils;
-import com.yf.pet.user.checkcode.CheckCode;
-import com.yf.pet.user.checkcode.enums.CheckCodeEnums;
+import com.yf.pet.user.api.checkcode.CheckCode;
+import com.yf.pet.user.api.checkcode.enums.CheckCodeEnums;
+import com.yf.pet.user.api.dto.*;
+import com.yf.pet.user.api.entity.User;
+import com.yf.pet.user.api.entity.UserRegisterEnum;
+import com.yf.pet.user.api.service.IUserService;
 import com.yf.pet.user.dao.UserDao;
-import com.yf.pet.user.dto.*;
-import com.yf.pet.user.entity.User;
-import com.yf.pet.user.entity.UserRegisterEnum;
-import com.yf.pet.user.service.IUserService;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,10 +50,6 @@ public class UserServiceImpl implements IUserService {
     @Autowired
     private UserDao userDao;
 
-
-//    @Autowired
-//    private StringRedisTemplate redisTemplate;
-
     @Autowired
     private PetEmailService petEmailService;
 
@@ -64,14 +60,16 @@ public class UserServiceImpl implements IUserService {
      * @return
      */
     @Override
-    public User emailRegister(UserRegisterDto userRegisterDto) {
+    public UserLoginReturnDto emailRegister(UserRegisterDto userRegisterDto) {
         User user = new User();
         BeanUtils.copyProperties(userRegisterDto, user);
         user.setRegisterType(UserRegisterEnum.EMAIL);
-//        user.setActivateStatus(UserActivateStatus.ACTIVATE);//邮箱激活
-//        user.setLoginType(LoginTypeEnum.EMAIL);
         user = register(user);
-        return user;
+
+        //返回
+        UserLoginReturnDto userLoginReturnDto = new UserLoginReturnDto();
+        BeanUtils.copyProperties(user, userLoginReturnDto);
+        return userLoginReturnDto;
     }
 
     /**
@@ -108,7 +106,7 @@ public class UserServiceImpl implements IUserService {
      * @return
      */
     @Override
-    public User emailLogin(UserEmailLoginDto userEmailLoginDto) {
+    public UserLoginReturnDto emailLogin(UserEmailLoginDto userEmailLoginDto) {
         //根据email查找用户数据
         User user = userDao.findByEmail(userEmailLoginDto.getEmail());
 
@@ -122,8 +120,8 @@ public class UserServiceImpl implements IUserService {
         }
 
         //登录逻辑
-        user = loginSave(user);
-        return user;
+        UserLoginReturnDto userLoginReturnDto = loginSave(user);
+        return userLoginReturnDto;
     }
 
     /**
@@ -133,18 +131,19 @@ public class UserServiceImpl implements IUserService {
      * @return
      */
     @Override
-    public User openLogin(UserOpenIdLoginDto userOpenIdLoginDto) throws IOException {
+    public UserLoginReturnDto openLogin(UserOpenIdLoginDto userOpenIdLoginDto) throws IOException {
         //根据openId查找用户数据
         User user = userDao.findByOpenId(userOpenIdLoginDto.getOpenId(), userOpenIdLoginDto.getOpenType());
 
         //用户不存在，则执行注册逻辑
         if (user == null) {
-            openRegister(userOpenIdLoginDto);
+            UserLoginReturnDto userLoginReturnDto = openRegister(userOpenIdLoginDto);
+            return userLoginReturnDto;
         }
 
         //用户存在则执行登录
-        user = loginSave(user);
-        return user;
+        UserLoginReturnDto userLoginReturnDto = loginSave(user);
+        return userLoginReturnDto;
     }
 
     /**
@@ -154,25 +153,22 @@ public class UserServiceImpl implements IUserService {
      * @return
      * @throws IOException
      */
-    private User openRegister(UserOpenIdLoginDto userOpenIdLoginDto) throws IOException {
+    private UserLoginReturnDto openRegister(UserOpenIdLoginDto userOpenIdLoginDto) throws IOException {
         //如果是第三方账号的邮箱且邮箱已存在，则直接合并第三方账号到现有账号里
-        User user = new User();
+        User user = null;
         Boolean marge = false;
         if (userOpenIdLoginDto.getOpenEmail() != null && userOpenIdLoginDto.getOpenEmail()
                 && !StringUtils.isEmpty(userOpenIdLoginDto.getEmail())) {
             user = userDao.findByEmail(userOpenIdLoginDto.getEmail());
             if (user != null) {
                 marge = true;
+            } else {
+                user = new User();
             }
         }
 
         //复制属性
         BeanUtils.copyProperties(userOpenIdLoginDto, user);
-        //上传头像
-        if (userOpenIdLoginDto.getHeadPicFile() != null && userOpenIdLoginDto.getHeadPicFile().length > 0) {
-            String headPicUrl = uploadHeadPicToOss(userOpenIdLoginDto.getHeadPicFile());
-            user.setHeadPic(headPicUrl);
-        }
 
         if (marge) {
             //合并账号,更新资料，以facebook的为主
@@ -185,7 +181,10 @@ public class UserServiceImpl implements IUserService {
             user.setRegisterType(UserRegisterEnum.OPENID);
             user = register(user);
         }
-        return user;
+
+        UserLoginReturnDto userLoginReturnDto = new UserLoginReturnDto();
+        BeanUtils.copyProperties(user, userLoginReturnDto);
+        return userLoginReturnDto;
     }
 
     /**
@@ -194,7 +193,7 @@ public class UserServiceImpl implements IUserService {
      * @param user
      * @return
      */
-    private User loginSave(User user) {
+    private UserLoginReturnDto loginSave(User user) {
         if (!StringUtils.isEmpty(user.getAccessToken())) {
             //删除redis里以前的Key
             RedisUtilsPet.evictUserByToken(user.getAccessToken());
@@ -212,7 +211,9 @@ public class UserServiceImpl implements IUserService {
         userDao.updateUserLoginInfo(user);
         //更新redis存储的用户信息
         RedisUtilsPet.putUserKeyToken(user);
-        return user;
+        UserLoginReturnDto userLoginReturnDto = new UserLoginReturnDto();
+        BeanUtils.copyProperties(user, userLoginReturnDto);
+        return userLoginReturnDto;
     }
 
     /**
@@ -318,10 +319,12 @@ public class UserServiceImpl implements IUserService {
      * @param accessToken
      */
     @Override
-    public User getUserInfo(String accessToken) {
+    public UserLoginReturnDto getUserInfo(String accessToken) {
         //token修改为空
         User user = userDao.findByAccessToken(accessToken);
-        return user;
+        UserLoginReturnDto userLoginReturnDto = new UserLoginReturnDto();
+        BeanUtils.copyProperties(user, userLoginReturnDto);
+        return userLoginReturnDto;
     }
 
     /**
@@ -332,22 +335,19 @@ public class UserServiceImpl implements IUserService {
      * @throws IOException
      */
     @Override
-    public User updateUserInfo(UserUpdateInfoDto userUpdateInfoDto) throws IOException {
+    public UserLoginReturnDto updateUserInfo(UserUpdateInfoDto userUpdateInfoDto) throws IOException {
         //查询用户信息
         User user = userDao.findByAccessToken(userUpdateInfoDto.getAccessToken());
         if (user == null) {
             throw new YFException(ReturnMessageEnum.TOKEN_INVALID);
         }
-        //上传头像文件到oss
-        if (userUpdateInfoDto.getHeadPicFile() != null) {
-            String headPicUrl = uploadHeadPicToOss(userUpdateInfoDto.getHeadPicFile());
-            user.setHeadPic(headPicUrl);
-        }
 
         BeanUtils.copyProperties(userUpdateInfoDto, user);
 
         userDao.updateUserInfo(user);
-        return user;
+        UserLoginReturnDto userLoginReturnDto = new UserLoginReturnDto();
+        BeanUtils.copyProperties(user, userLoginReturnDto);
+        return userLoginReturnDto;
     }
 
     /**
@@ -392,5 +392,11 @@ public class UserServiceImpl implements IUserService {
 
         //发送邮件
         petEmailService.sendMail(user.getEmail(), "yftech", petEmailService.createResetPwdHtml(user.getEmail(), code));
+    }
+
+    @Override
+    public String uploadPic(byte[] picture) throws IOException {
+        String url = uploadHeadPicToOss(picture);
+        return url;
     }
 }

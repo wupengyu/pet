@@ -12,13 +12,13 @@
 	<!-- 提供方应用信息，用于计算依赖关系 -->
     <dubbo:application name="pet-web" />
 	<!-- 使用zookeeper注册中心暴露服务地址 --> 
-    <dubbo:registry address="zookeeper://112.74.27.38:2181" />
+    <dubbo:registry address="${zookeeper.address}" />
 	<!-- 用dubbo协议在20880端口暴露服务 -->
-    <dubbo:protocol name="dubbo" port="20881" />
+    <dubbo:protocol name="dubbo" port="${dubbo.port}" />
 	<!-- 禁止重试动作 -->
 	<dubbo:provider delay="-1" timeout="20000"  retries="0"/>
 
     <!-- 引用外部service层模块 -->
-	<dubbo:reference id="userService" interface="com.yf.pet.user.service.IUserService" />
+	<dubbo:reference id="userService" interface="com.yf.pet.user.api.service.IUserService" />
 
 </beans>

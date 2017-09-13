@@ -1,6 +1,6 @@
 package com.yf.pet.user.dao;
 
-import com.yf.pet.user.entity.User;
+import com.yf.pet.user.api.entity.User;
 import org.apache.ibatis.annotations.Param;
 
 /**

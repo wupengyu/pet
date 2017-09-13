@@ -1,9 +1,5 @@
 package com.yf.pet.common;
 
-import com.yf.pet.common.utils.AliyunOssUtils;
-import com.yf.pet.common.utils.YFEnumFileKey;
-import org.apache.commons.lang.BooleanUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,13 +96,5 @@ public class ApplicationConstants {
      * 深睡
      */
     public final static byte DEEP = 2;
-
-
-    // 获取头像显示目录
-    public static String getHeadPicShowUrl(String fileName) {
-        // 对图片做压缩，长宽限定在120
-        return YFEnumFileKey.HEAD_PIC.getHttpPath() + fileName + AliyunOssUtils.IMG_FORMAT;
-        // return FILE_HTTP_URL + HEAD_IMG_FILE_PATH + "/";
-    }
 
 }

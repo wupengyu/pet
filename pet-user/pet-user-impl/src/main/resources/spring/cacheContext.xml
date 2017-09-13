@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:p="http://www.springframework.org/schema/p"
+	   xmlns:c="http://www.springframework.org/schema/c"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+	<bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">
+		<property name="maxIdle" value="${redis.pool.maxIdle}" />
+		<!-- <property name="maxActive" value="${redis.pool.maxActive}" /> -->
+		<!-- <property name="maxWait" value="${redis.pool.maxWait}" /> -->
+		<property name="testOnBorrow" value="${redis.pool.testOnBorrow}" />
+	</bean>
+
+	<!-- 没密码 -->
+	<!--<bean id="connectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"-->
+		  <!--p:host-name="${redis.master.host}" p:port="${redis.master.port}" p:pool-config-ref="poolConfig"/>-->
+
+	<!-- redis 密码授权 -->
+	<bean id="connectionFactory"
+	class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"
+	p:host-name="${redis.master.host}" p:port="${redis.master.port}"
+	p:password="${redis.password}" p:pool-config-ref="poolConfig" />
+
+	<!--<bean id="redisTemplate" class="org.springframework.data.redis.core.StringRedisTemplate"> 
+		<property name="connectionFactory" ref="connectionFactory" /> </bean> -->
+
+	<bean id='jedisConnectionFactory'
+		class='org.springframework.data.redis.connection.jedis.JedisConnectionFactory'
+		p:host-name='${redis.master.host}' p:port='${redis.master.port}'
+		p:password='${redis.password}' p:use-pool='true' />
+
+	<!-- redis template definition -->
+	<bean id='redisTemplate' class='org.springframework.data.redis.core.RedisTemplate'
+		p:connection-factory-ref='jedisConnectionFactory'>
+		<property name="keySerializer">
+			<bean
+				class="org.springframework.data.redis.serializer.StringRedisSerializer" />
+		</property>
+		<property name="valueSerializer">
+			<bean
+				class="org.springframework.data.redis.serializer.StringRedisSerializer" />
+		</property>
+		<property name="hashKeySerializer">
+			<bean
+				class="org.springframework.data.redis.serializer.StringRedisSerializer" />
+		</property>
+		<property name="hashValueSerializer">
+			<bean
+				class="org.springframework.data.redis.serializer.StringRedisSerializer" />
+		</property>
+	</bean>
+
+	<bean id="keyRedisSerializer"
+		class="org.springframework.data.redis.serializer.StringRedisSerializer" />
+	<!-- Redis template definition -->
+	<bean id="stringRedisTemplate" class="org.springframework.data.redis.core.RedisTemplate"
+		p:connection-factory-ref="jedisConnectionFactory" p:keySerializer-ref="keyRedisSerializer" />
+
+	<!-- Session缓存管理器及其包装类 start -->
+	<bean id="sessionCacheManager" class="org.springframework.data.redis.cache.RedisCacheManager"
+		c:template-ref="stringRedisTemplate">
+		<property name="usePrefix" value="true" />
+	</bean>
+	<bean
+		class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="staticMethod"
+			value="com.yf.pet.common.cache.SessionCacheWrapper.setSessionCacheManager" />
+		<property name="arguments" ref="sessionCacheManager" />
+	</bean>
+
+	<bean
+		class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="staticMethod"
+			value="com.yf.pet.common.cache.SessionCacheWrapper.setRedisTemplate" />
+		<property name="arguments" ref="stringRedisTemplate" />
+	</bean>
+	<!-- 用户登录token过期时间 -->
+	<bean
+		class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="staticMethod"
+			value="com.yf.pet.common.cache.SessionCacheWrapper.setExpiredTime" />
+		<property name="arguments" value="${redis.session.expire.time}" />
+	</bean>
+	<!-- 后台管理员token过期时间 -->
+	<bean
+		class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="staticMethod"
+			value="com.yf.pet.common.cache.SessionCacheWrapper.setExpiredTimeAdmin" />
+		<property name="arguments" value="${redis.session.admin.expire.time}" />
+	</bean>
+	<!-- Session缓存管理器及其包装类 end -->
+
+	<!-- <bean id="keyRedisSerializer" class="org.springframework.data.redis.serializer.StringRedisSerializer" 
+		/> Redis template definition <bean id="stringRedisTemplate" class="org.springframework.data.redis.core.RedisTemplate" 
+		p:connection-factory-ref="jedisConnectionFactory" p:keySerializer-ref="keyRedisSerializer" 
+		/> -->
+
+	<!-- declare Redis Cache Manager -->
+	<bean id="cacheManager" class="org.springframework.data.redis.cache.RedisCacheManager"
+		c:template-ref="redisTemplate" />
+
+</beans>

@@ -33,7 +33,6 @@ http://www.springframework.org/schema/util/spring-util.xsd">
         <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
     </context:component-scan>
 
-
     <!-- 可以使用这方式配置拦截器 -->
     <mvc:interceptors>
         <!--自定义异常拦截器-->
@@ -41,7 +40,6 @@ http://www.springframework.org/schema/util/spring-util.xsd">
         <!-- 会话过期拦截器的配置。判断token是否过期-->
         <bean class="com.yf.pet.web.common.interceptor.AuthInterceptor"/>
     </mvc:interceptors>
-
 
     <!-- 配置Fastjson支持 -->
     <!-- 时间格式转换成yyyy-MM-dd hh:mm:ss -->

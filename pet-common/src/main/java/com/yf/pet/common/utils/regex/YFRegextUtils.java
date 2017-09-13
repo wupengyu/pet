@@ -4,7 +4,7 @@
 
 package com.yf.pet.common.utils.regex;
 
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

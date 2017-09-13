@@ -5,7 +5,7 @@
 package com.yf.pet.common.cache;
 
 import com.alibaba.fastjson.JSON;
-import com.yf.pet.user.entity.User;
+import com.yf.pet.user.api.entity.User;
 import org.springframework.util.StringUtils;
 
 /**

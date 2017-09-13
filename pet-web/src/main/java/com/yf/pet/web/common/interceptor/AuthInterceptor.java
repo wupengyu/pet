@@ -7,7 +7,7 @@ package com.yf.pet.web.common.interceptor;
 import com.yf.pet.common.ReturnMessageEnum;
 import com.yf.pet.common.cache.RedisUtilsPet;
 import com.yf.pet.common.exception.YFException;
-import com.yf.pet.user.entity.User;
+import com.yf.pet.user.api.entity.User;
 import com.yf.pet.web.common.annotation.DisableAuth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

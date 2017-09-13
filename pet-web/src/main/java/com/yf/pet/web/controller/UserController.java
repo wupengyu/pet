@@ -7,15 +7,15 @@ package com.yf.pet.web.controller;
 
 import com.yf.pet.common.ResponseVO;
 import com.yf.pet.common.ReturnMessageEnum;
+import com.yf.pet.common.exception.YFException;
+import com.yf.pet.common.utils.regex.YFRegextUtils;
+import com.yf.pet.user.api.dto.*;
+import com.yf.pet.user.api.entity.User;
+import com.yf.pet.user.api.service.IUserService;
 import com.yf.pet.web.common.annotation.DisableAuth;
 import com.yf.pet.web.common.utils.TokenUtils;
-import com.yf.pet.common.utils.regex.YFRegextUtils;
-import com.yf.pet.common.exception.YFException;
-import com.yf.pet.user.dto.*;
-import com.yf.pet.user.entity.User;
-import com.yf.pet.user.service.IUserService;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +82,7 @@ public class UserController {
         }
 
         //注册
-        User user = userService.emailRegister(userRegisterDto);
+        UserLoginReturnDto user = userService.emailRegister(userRegisterDto);
 
         ResponseVO responseVO = new ResponseVO(ReturnMessageEnum.RETURN_OK);
         responseVO.setData(user);
@@ -111,7 +111,7 @@ public class UserController {
         }
 
         //登录
-        User user = userService.emailLogin(userEmailLoginDto);
+        UserLoginReturnDto user = userService.emailLogin(userEmailLoginDto);
 
         ResponseVO responseVO = new ResponseVO(ReturnMessageEnum.RETURN_OK);
         responseVO.setData(user);
@@ -126,39 +126,7 @@ public class UserController {
      */
     @DisableAuth
     @RequestMapping(value = "/openlogin", consumes = "application/json", produces = "application/json")
-    public ResponseVO openAccountlogin(@RequestParam(value = "file", required = false) MultipartFile file, HttpServletRequest request) throws Exception {
-        //获取参数
-        UserOpenIdLoginDto userOpenIdLoginDto = new UserOpenIdLoginDto();
-        String openEmailStr = request.getHeader("openEmail");
-        if (!StringUtils.isEmpty(openEmailStr)) {
-            userOpenIdLoginDto.setOpenEmail(Boolean.valueOf(openEmailStr));
-        }
-
-        userOpenIdLoginDto.setOpenId(StringUtils.isEmpty(request.getParameter("openId")) ? null : request.getParameter("openId"));
-        Object openTypeObj = request.getParameter("openType");
-        if (openTypeObj != null && !StringUtils.isEmpty(openTypeObj.toString())) {
-            userOpenIdLoginDto.setOpenType( NumberUtils.toInt(openTypeObj.toString()));
-        }
-
-        userOpenIdLoginDto.setFirstName(StringUtils.isEmpty(request.getParameter("firstName")) ? null : request.getParameter("firstName"));
-        userOpenIdLoginDto.setLastName(StringUtils.isEmpty(request.getParameter("lastName")) ? null : request.getParameter("lastName"));
-        userOpenIdLoginDto.setMobile(StringUtils.isEmpty(request.getParameter("mobile")) ? null : request.getParameter("mobile"));
-        userOpenIdLoginDto.setEmail(StringUtils.isEmpty(request.getParameter("email")) ? null : request.getParameter("email"));
-
-        Object sexObj = request.getParameter("gender");
-        if (sexObj != null && !StringUtils.isEmpty(sexObj.toString())) {
-            userOpenIdLoginDto.setGender( NumberUtils.toInt(sexObj.toString()));
-        }
-
-        Object registerTimezoneObj = request.getParameter("registerTimezone");
-        if (registerTimezoneObj != null && !StringUtils.isEmpty(registerTimezoneObj.toString())) {
-            userOpenIdLoginDto.setRegisterTimezone(NumberUtils.toInt(registerTimezoneObj.toString()));
-        }
-
-        if (file != null && file.getSize() > 0) {
-            userOpenIdLoginDto.setHeadPicFile(file.getBytes());
-        }
-
+    public ResponseVO openAccountlogin(@RequestBody UserOpenIdLoginDto userOpenIdLoginDto) throws Exception {
         // 检查参数
         if (userOpenIdLoginDto == null) {
             throw new YFException(ReturnMessageEnum.PARAMETER_ERROR);
@@ -169,13 +137,13 @@ public class UserController {
         if (userOpenIdLoginDto.getOpenType() == null) {
             throw new YFException(ReturnMessageEnum.OPEN_TYPE_NULL);
         }
-        if(userOpenIdLoginDto.getOpenEmail() != null && userOpenIdLoginDto.getOpenEmail() && StringUtils.isEmpty(userOpenIdLoginDto.getEmail()) ){
+        if (userOpenIdLoginDto.getOpenEmail() != null && userOpenIdLoginDto.getOpenEmail() && StringUtils.isEmpty(userOpenIdLoginDto.getEmail())) {
             throw new YFException(ReturnMessageEnum.EMAIL_NULL);
         }
 
         //登录
         log.info("第三方用户登录：" + userOpenIdLoginDto.toString());
-        User user = userService.openLogin(userOpenIdLoginDto);
+        UserLoginReturnDto user = userService.openLogin(userOpenIdLoginDto);
 
         ResponseVO responseVO = new ResponseVO(ReturnMessageEnum.RETURN_OK);
         responseVO.setData(user);
@@ -290,34 +258,16 @@ public class UserController {
      * @throws Exception 异常抛出
      */
     @RequestMapping(value = "/updateuserinfo")
-    public ResponseVO updateUserinfo(@RequestParam(value = "file", required = false) MultipartFile file, HttpServletRequest request) throws Exception {
-        log.info("更新用户信息：");
+    public ResponseVO updateUserinfo(@RequestBody UserUpdateInfoDto userUpdateInfoDto, HttpServletRequest request) throws Exception {
         String accessToken = TokenUtils.getAuthToken(request);
         if (StringUtils.isEmpty(accessToken)) {
             throw new YFException(ReturnMessageEnum.TOKEN_NULL);
         }
-
-        //接收参数
-        UserUpdateInfoDto userUpdateInfoDto = new UserUpdateInfoDto();
-        if (file != null && file.getSize() > 0) {
-            userUpdateInfoDto.setHeadPicFile(file.getBytes());
-        }
-
         userUpdateInfoDto.setAccessToken(accessToken);
-        userUpdateInfoDto.setFirstName(StringUtils.isEmpty(request.getParameter("firstName")) ? null : request.getParameter("firstName"));
-        userUpdateInfoDto.setLastName(StringUtils.isEmpty(request.getParameter("lastName")) ? null : request.getParameter("lastName"));
-        userUpdateInfoDto.setMobile(StringUtils.isEmpty(request.getParameter("mobile")) ? null : request.getParameter("mobile"));
-
-        Integer gender = null;
-        Object sexObj = request.getParameter("gender");
-        if (sexObj != null && !StringUtils.isEmpty(sexObj.toString())) {
-            gender = NumberUtils.toInt(sexObj.toString());
-        }
-        userUpdateInfoDto.setGender(gender);
 
         //调用接口
         log.info("更新用户信息：" + userUpdateInfoDto.toString());
-        User user = userService.updateUserInfo(userUpdateInfoDto);
+        UserLoginReturnDto user = userService.updateUserInfo(userUpdateInfoDto);
 
         ResponseVO responseVO = new ResponseVO(ReturnMessageEnum.RETURN_OK);
         responseVO.setData(user);
@@ -333,13 +283,12 @@ public class UserController {
      */
     @RequestMapping(value = "/getuserinfo", consumes = "application/json", produces = "application/json")
     public ResponseVO getUserinfo(HttpServletRequest request) throws Exception {
-        log.info("获取用户信息");
         String accessToken = TokenUtils.getAuthToken(request);
         if (StringUtils.isEmpty(accessToken)) {
             throw new YFException(ReturnMessageEnum.TOKEN_NULL);
         }
         log.info("获取用户信息: " + accessToken);
-        User user = userService.getUserInfo(accessToken);
+        UserLoginReturnDto user = userService.getUserInfo(accessToken);
         ResponseVO responseVO = new ResponseVO(ReturnMessageEnum.RETURN_OK);
         responseVO.setData(user);
         return responseVO;
@@ -392,6 +341,29 @@ public class UserController {
         }
 
         ResponseVO responseVO = new ResponseVO(ReturnMessageEnum.RETURN_OK);
+        return responseVO;
+    }
+
+    /**
+     * 上传图片到服务器
+     *
+     * @param file
+     * @param request
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/upload/picture")
+    public ResponseVO uploadPicture(@RequestParam(value = "file", required = true) MultipartFile file, HttpServletRequest request) throws Exception {
+        log.info("上传图片到服务器: ");
+        // 检查参数
+        if (file == null || file.getSize() <= 0) {
+            throw new YFException(ReturnMessageEnum.PARAMETER_NULL);
+        }
+
+        String url = userService.uploadPic(file.getBytes());
+
+        ResponseVO responseVO = new ResponseVO(ReturnMessageEnum.RETURN_OK);
+        responseVO.setData(url);
         return responseVO;
     }
 
