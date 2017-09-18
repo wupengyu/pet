@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 账户信息mapper -->
+<mapper namespace="com.yf.pet.pets.dao.IPetsDao">
+    <!-- 用户账户map对象 -->
+    <resultMap id="petMap" type="com.yf.pet.pets.api.entity.Pet">
+        <result column="pet_id" property="petId"/>
+        <result column="user_id" property="userId"/>
+        <result column="device_id" property="deviceId"/>
+        <result column="head_pic" property="headPic"/>
+        <result column="gender" property="gender"/>
+        <result column="nick_name" property="nickName"/>
+        <result column="birthday" property="userIdbirthday"/>
+        <result column="is_sterilization" property="isSterilization"/>
+        <result column="shoulder_height" property="shoulderHeight"/>
+        <result column="weight" property="weight"/>
+        <result column="pet_breed_id" property="petBreedId"/>
+        <result column="pedigree" property="pedigree"/>
+        <result column="target" property="target"/>
+    </resultMap>
+
+    <!-- 新增宠物 -->
+    <insert id="add" >
+        INSERT INTO
+        pet (pet_id,user_id,head_pic,gender,nick_name,birthday,is_sterilization
+              ,shoulder_height,weight,pet_breed_id,pedigree,target)
+        VALUES(#{petId},#{userId},#{headPic},#{gender},
+        #{nickName},#{birthday},#{isSterilization},#{shoulderHeight},#{weight},#{petBreedId},#{pedigree}
+        ,#{target})
+	</insert>
+
+    <!-- 修改宠物 -->
+    <insert id="update" >
+        update pet set head_pic = #{headPic} ,gender = #{gender},nick_name = #{nickName}, birthday = #{birthday},
+        is_sterilization = #{isSterilization}, shoulder_height =  #{shoulderHeight}, weight = #{weight},
+        pet_breed_id = #{petBreedId}, pedigree = #{pedigree} , target = #{target}
+        where pet_id = #{petId}
+         AND is_disable = FALSE
+    </insert>
+
+    <!--查询宠物列表-->
+    <select id="list" resultMap="petMap">
+        SELECT * FROM pet
+        WHERE user_id = #{userId}
+        AND is_disable = FALSE
+    </select>
+
+    <!--查询宠物列表-->
+    <select id="query" resultMap="petMap">
+        SELECT * FROM pet
+        WHERE user_id = #{userId}
+        AND pet_id = #{petId}
+        AND is_disable = FALSE
+    </select>
+
+    <!--删除-->
+    <select id="delete">
+        update pet set is_disable = TRUE
+        where pet_id = #{petId}
+    </select>
+
+</mapper>

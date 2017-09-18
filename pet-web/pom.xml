@@ -24,6 +24,12 @@
 
         <dependency>
             <groupId>com.yf</groupId>
+            <artifactId>pet-pets-api</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.yf</groupId>
             <artifactId>pet-common</artifactId>
             <version>1.0-SNAPSHOT</version>
             <!--<exclusions>-->

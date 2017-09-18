@@ -30,9 +30,8 @@ import org.springframework.util.StringUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
+import java.math.BigInteger;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -91,7 +90,7 @@ public class UserServiceImpl implements IUserService {
 
         //设置userId
         Long userId = YFPrimaryKeyUtils.getId(ServiceModeType.USER);
-        user.setUserId(userId);
+        user.setUserId( BigInteger.valueOf(userId));
         userDao.addUser(user);
 
         //把用户信息保存到redis
@@ -399,4 +398,16 @@ public class UserServiceImpl implements IUserService {
         String url = uploadHeadPicToOss(picture);
         return url;
     }
+
+//    public static void main(String[] args) {
+//        List<PetQueryResultDto> ls = new ArrayList<PetQueryResultDto>();
+//        PetQueryResultDto petQueryResultDto = new PetQueryResultDto();
+//        petQueryResultDto.setUserId(12);
+//        PetQueryResultDto petQueryResultDto1 = new PetQueryResultDto();
+//        petQueryResultDto1.setUserId(21);
+//        ls.add(petQueryResultDto);
+//        ls.add(petQueryResultDto1);
+//        Gson gson = new Gson();
+//        System.out.println(gson.toJson(ls));
+//    }
 }

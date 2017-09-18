@@ -2,7 +2,7 @@
  * Copyright (c) 2014-2018 Chenlaisoft Co.Ltd. All rights reserved.
  */
 
-package com.yf.pet.web.common.utils;
+package com.yf.pet.common.cache.utils;
 
 import javax.servlet.http.HttpServletRequest;
 

@@ -19,6 +19,7 @@
 	<dubbo:provider delay="-1" timeout="20000"  retries="0"/>
 
     <!-- 引用外部service层模块 -->
-	<dubbo:reference id="userService" interface="com.yf.pet.user.api.service.IUserService" />
+	<dubbo:reference id="userService" interface="com.yf.pet.user.api.service.IUserService" check="false"/>
+    <dubbo:reference id="petsService" interface="com.yf.pet.pets.api.service.IPetsService" />
 
 </beans>

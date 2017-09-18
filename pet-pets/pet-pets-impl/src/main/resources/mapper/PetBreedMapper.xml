@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 账户信息mapper -->
+<mapper namespace="com.yf.pet.pets.dao.IPetsBreedDao">
+    <!-- 用户账户map对象 -->
+    <resultMap id="petMap" type="com.yf.pet.pets.api.entity.PetBreed">
+        <result column="pet_breed_id" property="petBreedId"/>
+        <result column="pet_species" property="petSpecies"/>
+        <result column="pet_breed_china_name" property="petBreedChinaName"/>
+        <result column="pet_breed_pic" property="petBreedPic"/>
+        <result column="pet_china_initials" property="petChinaInitials"/>
+        <result column="pet_breed_english_name" property="petBreedEnglishName"/>
+        <result column="pet_enlish_initials" property="petEnlishInitials"/>
+    </resultMap>
+
+    <!-- 新增宠物 -->
+    <insert id="add" >
+        INSERT INTO pet_breed
+         (pet_species,pet_breed_china_name,pet_breed_pic,pet_china_initials,pet_breed_english_name,pet_enlish_initials)
+        VALUES(#{petSpecies},#{petBreedChinaName},#{petBreedPic},#{petChinaInitials},
+        #{petBreedEnglishName},#{petEnlishInitials})
+	</insert>
+
+    <!--查询宠物列表-->
+    <select id="findBreeds" resultMap="petMap">
+        SELECT pet_breed_id, pet_species,pet_breed_china_name,pet_breed_pic,
+                pet_china_initials,pet_breed_english_name,pet_enlish_initials
+        FROM pet_breed
+    </select>
+
+    <!--删除-->
+    <select id="delete">
+        DELETE TABLE pet_breed where pet_breed_id = #{petBreedId}
+    </select>
+
+</mapper>

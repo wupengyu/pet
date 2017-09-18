@@ -7,15 +7,13 @@ package com.yf.pet.web.controller;
 
 import com.yf.pet.common.ResponseVO;
 import com.yf.pet.common.ReturnMessageEnum;
+import com.yf.pet.common.cache.utils.TokenUtils;
 import com.yf.pet.common.exception.YFException;
 import com.yf.pet.common.utils.regex.YFRegextUtils;
 import com.yf.pet.user.api.dto.*;
-import com.yf.pet.user.api.entity.User;
 import com.yf.pet.user.api.service.IUserService;
 import com.yf.pet.web.common.annotation.DisableAuth;
-import com.yf.pet.web.common.utils.TokenUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -172,12 +170,9 @@ public class UserController {
         }
 
         Boolean isExist = userService.findAccountIsExist(null, verifyOpenIdExistDto.getOpenId());
-        if (isExist) {
-            ResponseVO responseVO = new ResponseVO(ReturnMessageEnum.ACCOUNT_IS_EXIST);
-            return responseVO;
-        }
 
         ResponseVO responseVO = new ResponseVO(ReturnMessageEnum.RETURN_OK);
+        responseVO.setData(isExist);
         return responseVO;
     }
 

@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.Date;
 
 /**
@@ -19,7 +20,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserLoginReturnDto implements Serializable {
-    private long userId;
+    private BigInteger userId;
     private String mobile;
     private String email;
     private String accessToken;//登陆成功，返回访问的令牌

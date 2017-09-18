@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.Date;
 
 /**
@@ -19,8 +20,8 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserLoginAction implements Serializable  {
-    private String id;
-    private String userId;
+    private BigInteger id;
+    private BigInteger userId;
     private String accessToken;
     private Integer loginType;
     private String ipAddress;//最后登录的IP地址
